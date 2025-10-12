@@ -14,32 +14,46 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Sử dụng BCrypt để mã hóa mật khẩu
+        // BCrypt để mã hóa mật khẩu an toàn
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(authorize -> authorize
-                // Cho phép tất cả mọi người truy cập vào các URL này
-                .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/register").permitAll()
-                // Tất cả các request khác đều cần phải xác thực (đăng nhập)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/login", "/register", "/register/**", 
+                                 "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .formLogin(formLogin -> formLogin
-                // Cấu hình trang đăng nhập
+            .formLogin(form -> form
                 .loginPage("/login")
-                // URL xử lý đăng nhập, Spring Security sẽ tự động xử lý
                 .loginProcessingUrl("/login")
-                // Chuyển hướng đến trang chủ sau khi đăng nhập thành công
                 .defaultSuccessUrl("/", true)
+                .failureUrl("/login?error=true")
                 .permitAll()
             )
             .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
                 .permitAll()
             );
 
         return http.build();
     }
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//            .authorizeHttpRequests(auth -> auth
+//                .anyRequest().permitAll()   // Cho phép tất cả request
+//            )
+//            .formLogin(form -> form
+//                .loginPage("/login")
+//                .permitAll()
+//            )
+//            .logout(logout -> logout.permitAll());
+//
+//        return http.build();
+//    }
+
 }

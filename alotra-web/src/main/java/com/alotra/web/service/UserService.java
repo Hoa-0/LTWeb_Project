@@ -22,7 +22,7 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
-        user.setRole("USER");
+        user.setRole("ROLE_USER");
 
         userRepository.save(user);
     }
