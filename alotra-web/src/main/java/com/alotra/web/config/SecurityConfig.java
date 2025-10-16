@@ -1,5 +1,7 @@
 package com.alotra.web.config;
 
+import com.alotra.web.security.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,17 +14,22 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // BCrypt để mã hóa mật khẩu an toàn
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            // Dùng UserDetailsService của bạn (tránh phải tự tạo DaoAuthenticationProvider bị warning deprecated)
+            .userDetailsService(customUserDetailsService)
+
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register", "/register/**", 
+                .requestMatchers("/", "/login", "/register", "/register/**",
                                  "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             )
@@ -41,19 +48,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//            .authorizeHttpRequests(auth -> auth
-//                .anyRequest().permitAll()   // Cho phép tất cả request
-//            )
-//            .formLogin(form -> form
-//                .loginPage("/login")
-//                .permitAll()
-//            )
-//            .logout(logout -> logout.permitAll());
-//
-//        return http.build();
-//    }
-
 }

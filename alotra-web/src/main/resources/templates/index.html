@@ -5,16 +5,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AloTra - Chuỗi Trà Sữa</title>
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+
+    <!-- BOOTSTRAP CSS (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Bootstrap Icons cho icon mạng xã hội -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- CSS tùy biến -->
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-        <a class="navbar-brand" th:href="@{/}"> AloTra </a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 
-                <!-- Nếu chưa đăng nhập -->
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center" th:href="@{/}">
+            <img th:src="@{/images/logo-tea.svg}" alt="AloTra" width="28" height="28" class="me-2">
+            AloTra
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                <!-- Trang chủ -->
+                <li class="nav-item dropdown dropdown-mega">
+                    <a class="nav-link dropdown-toggle" href="#home" id="homeMenu" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Trang Chủ</a>
+                    <div class="dropdown-menu mega-menu p-4" aria-labelledby="homeMenu">
+                        <div class="row">
+                            <div class="col-6 col-lg-4">
+                                <h6 class="col-title">Giới thiệu</h6>
+                                <a href="#home" class="dropdown-item-link">Hero Banner</a>
+                                <a href="#about" class="dropdown-item-link">Về AloTra</a>
+                                <a href="#contact" class="dropdown-item-link">Liên hệ</a>
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <h6 class="col-title">Khám phá</h6>
+                                <a href="#menu" class="dropdown-item-link">Sản phẩm nổi bật</a>
+                                <a href="#menu" class="dropdown-item-link">Ưu đãi</a>
+                                <a href="#menu" class="dropdown-item-link">Bán chạy</a>
+                            </div>
+                            <div class="col-6 col-lg-4 mt-3 mt-lg-0">
+                                <h6 class="col-title">Hỗ trợ</h6>
+                                <a href="#contact" class="dropdown-item-link">CSKH</a>
+                                <a href="#contact" class="dropdown-item-link">Hệ thống cửa hàng</a>
+                                <a href="#contact" class="dropdown-item-link">Góp ý</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Thực đơn -->
+                <li class="nav-item dropdown dropdown-mega">
+                    <a class="nav-link dropdown-toggle" href="#menu" id="menuMega" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Thực Đơn</a>
+                    <div class="dropdown-menu mega-menu p-4" aria-labelledby="menuMega">
+                        <div class="row">
+                            <div class="col-6 col-lg-4">
+                                <h6 class="col-title">Nổi bật</h6>
+                                <a href="#menu" class="dropdown-item-link">Hàng mới về</a>
+                                <a href="#menu" class="dropdown-item-link">Độc quyền thành viên</a>
+                                <h6 class="col-title mt-3">Được yêu thích</h6>
+                                <a href="#menu" class="dropdown-item-link">Truyền thống</a>
+                                <a href="#menu" class="dropdown-item-link">Matcha</a>
+                                <a href="#menu" class="dropdown-item-link">Chocolate</a>
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <h6 class="col-title">Dòng đồ uống</h6>
+                                <a href="#menu" class="dropdown-item-link">Trà sữa</a>
+                                <a href="#menu" class="dropdown-item-link">Trà trái cây</a>
+                                <a href="#menu" class="dropdown-item-link">Macchiato</a>
+                                <a href="#menu" class="dropdown-item-link">Sữa chua</a>
+                            </div>
+                            <div class="col-6 col-lg-4 mt-3 mt-lg-0">
+                                <h6 class="col-title">Topping</h6>
+                                <a href="#menu" class="dropdown-item-link">Trân châu đen</a>
+                                <a href="#menu" class="dropdown-item-link">Thạch trái cây</a>
+                                <a href="#menu" class="dropdown-item-link">Pudding</a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="#about">Về Chúng Tôi</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">Liên Hệ</a></li>
+
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/my-orders}">Đơn hàng</a>
+                </li>
+
                 <li class="nav-item" sec:authorize="isAnonymous()">
                     <a class="nav-link" th:href="@{/register}">Đăng Ký</a>
                 </li>
@@ -22,30 +106,21 @@
                     <a class="nav-link" th:href="@{/login}">Đăng Nhập</a>
                 </li>
 
-                <!-- Nếu đã đăng nhập -->
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" href="#">Xin chào, <span sec:authentication="name"></span></a>
+                <li class="nav-item d-none d-lg-block" sec:authorize="isAuthenticated()">
+                    <span class="navbar-text">Xin chào, <strong><span sec:authentication="name"></span></strong></span>
                 </li>
 
-					<!-- Nếu user là khách hàng -->
-					<li class="nav-item" sec:authorize="hasRole('USER')"><a
-						class="nav-link" th:href="@{/vendor/register}">Trở thành người
-							bán</a></li>
-
-					<li class="nav-item" sec:authorize="hasRole('VENDOR')"><a
-						class="nav-link" th:href="@{/vendor/dashboard}">Kênh Người Bán</a>
-					</li>
-
-
-					<!-- Đơn hàng -->
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" th:href="@{/my-orders}">Đơn hàng của tôi</a>
+                <li class="nav-item ms-lg-3">
+                    <a class="btn btn-warning rounded-pill px-3" th:href="@{/cart}">
+                        🛒 Giỏ Hàng
+                        <span class="badge bg-dark ms-1"
+                              th:text="${session.cart != null} ? ${#maps.size(session.cart)} : 0">0</span>
+                    </a>
                 </li>
 
-                <!-- Đăng xuất -->
-                <li class="nav-item" sec:authorize="isAuthenticated()">
+                <li class="nav-item ms-lg-2" sec:authorize="isAuthenticated()">
                     <form th:action="@{/logout}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-link nav-link">Đăng Xuất</button>
+                        <button type="submit" class="btn btn-outline-secondary rounded-pill">Đăng Xuất</button>
                     </form>
                 </li>
             </ul>
@@ -53,41 +128,159 @@
     </div>
 </nav>
 
-<main class="container mt-4">
-    <h1 class="mb-4">Sản Phẩm Nổi Bật</h1>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+<!-- HERO -->
+<header id="home" class="hero-section">
+    <div class="container py-5">
+        <h1 class="display-4 fw-bold">Trà Sữa <span class="brand-accent">AloTra</span></h1>
+        <p class="lead mb-4">Thưởng thức hương vị đặc biệt của trà sữa tươi ngon, được pha chế từ những nguyên liệu tự nhiên tốt nhất</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="#menu" class="btn btn-cta btn-ghost-light">🍽️ Xem Thực Đơn</a>
+            <a href="#about" class="btn btn-cta btn-ghost-light">⏺ Khám Phá Thêm</a>
+        </div>
+    </div>
+</header>
 
-        <!-- Hiển thị danh sách sản phẩm -->
-        <div class="col" th:each="product : ${products}">
-            <div class="card h-100">
-                <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/default-product.jpg'}"
-                     class="card-img-top" th:alt="${product.name}">
-                <div class="card-body">
-                    <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>
-                    <p class="card-text text-danger fw-bold"
-                       th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
-                        25,000 VNĐ
-                    </p>
-                    <a th:href="@{/product/{id}(id=${product.id})}" class="btn btn-primary">Xem chi tiết</a>
+<main class="container mt-5">
+    <section id="menu" class="mb-5">
+        <div class="text-center mb-4">
+            <h2>Sản Phẩm <span class="brand-accent">Nổi Bật</span></h2>
+            <p class="text-muted">Khám phá những ly trà sữa được yêu thích nhất tại AloTra</p>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            <div class="col" th:each="product : ${products}">
+                <div class="card h-100 shadow-soft product-card">
+                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/default-product.jpg'}"
+                         class="card-img-top" th:alt="${product.name}">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>
+                        <p class="card-text text-danger fw-bold mb-3"
+                           th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">25.000đ</p>
+
+                        <div class="mt-auto d-flex gap-2 flex-wrap">
+                            <a th:href="@{/product/{id}(id=${product.id})}" class="btn btn-outline-primary flex-grow-1">
+                                Xem chi tiết
+                            </a>
+
+                            <form th:action="@{/cart/add}" method="post" class="d-inline" sec:authorize="isAuthenticated()">
+                                <input type="hidden" name="productId" th:value="${product.id}">
+                                <input type="hidden" name="quantity" value="1">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-primary">+ Thêm</button>
+                            </form>
+
+                            <a class="btn btn-primary d-inline" sec:authorize="isAnonymous()" th:href="@{/login}">
+                                + Thêm
+                            </a>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <div class="col-12" th:if="${products.isEmpty()}">
+                <p class="text-center text-muted">Chưa có sản phẩm nào để hiển thị.</p>
             </div>
         </div>
 
-        <!-- Nếu không có sản phẩm -->
-        <div class="col-12" th:if="${products.isEmpty()}">
-            <p class="text-center">Chưa có sản phẩm nào để hiển thị.</p>
+        <div class="text-center mt-4">
+            <a href="#menu" class="btn btn-orange rounded-pill px-4">🍽️ Xem Tất Cả Sản Phẩm</a>
         </div>
-
-    </div>
+    </section>
 </main>
 
-<footer class="bg-light text-center text-lg-start mt-5">
-    <div class="text-center p-3">
-        © 2025 Copyright:
-        <a class="text-dark" href="#">AloTra.com</a>
+<section id="about" class="stats-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-2">Thành Tựu Của Chúng Tôi</h2>
+        <p class="text-center mb-5" style="opacity:.85">Những con số ấn tượng từ sự tin tưởng của khách hàng</p>
+        <div class="row text-center g-4">
+            <div class="col-6 col-md-3">
+                <div class="stat-number">50+</div>
+                <div style="opacity:.85">Cửa Hàng</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-number">100K+</div>
+                <div style="opacity:.85">Đơn Hàng/Tháng</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-number">5+</div>
+                <div style="opacity:.85">Năm Kinh Nghiệm</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-number">4.9/5</div>
+                <div style="opacity:.85">Đánh Giá</div>
+            </div>
+        </div>
+
+        <div class="subscribe-box mx-auto mt-5">
+            <form class="d-flex gap-2">
+                <input class="form-control form-control-lg" type="email" placeholder="Email của bạn">
+                <button class="btn btn-light btn-lg" type="button">Đăng Ký</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section id="contact" class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Liên Hệ</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="list-group list-group-flush lead">
+                    <div class="list-group-item">📞 1900 1234</div>
+                    <div class="list-group-item">✉️ info@alotra.vn</div>
+                    <div class="list-group-item">📍 123 Đường ABC, Quận 1, TP.HCM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer-dark pt-5">
+    <div class="container pb-4">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-6">
+                <div class="d-flex align-items-center mb-2">
+                    <!-- Nếu logo tối màu trên nền tối: giữ class logo-invert; nếu logo đã trắng, xóa class logo-invert -->
+                    <img th:src="@{/images/logo-tea.svg}" alt="AloTra logo" width="32" height="32"
+                         class="me-2 footer-logo logo-invert">
+                    <span class="fs-5 fw-semibold">AloTra</span>
+                </div>
+                <p class="mb-3" style="opacity:.85">Thương hiệu trà sữa hàng đầu Việt Nam, mang đến những ly trà sữa thơm ngon và đậm đà nhất cho bạn.</p>
+
+                <!-- Icon mạng xã hội (sẽ thay bằng ảnh riêng sau cũng được) -->
+                <div class="social-icons d-flex gap-2 mt-3">
+                    <a href="#" class="si" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="si" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="si" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                    <a href="#" class="si" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-3">
+                <h6 class="fw-semibold mb-3">Liên Kết</h6>
+                <ul class="list-unstyled" style="opacity:.85">
+                    <li><a href="#home" class="footer-link">Trang Chủ</a></li>
+                    <li><a href="#menu" class="footer-link">Thực Đơn</a></li>
+                    <li><a href="#about" class="footer-link">Về Chúng Tôi</a></li>
+                    <li><a href="#contact" class="footer-link">Liên Hệ</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-3 col-lg-3">
+                <h6 class="fw-semibold mb-3">Liên Hệ</h6>
+                <ul class="list-unstyled" style="opacity:.85">
+                    <li>📞 1900 1234</li>
+                    <li>✉️ info@alotra.vn</li>
+                    <li>📍 123 Đường ABC, Quận 1, TP.HCM</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary-subtle my-4">
+        <div class="text-center" style="opacity:.85">© 2025 AloTra. Tất cả quyền được bảo lưu.</div>
     </div>
 </footer>
 
-<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<!-- BOOTSTRAP JS (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

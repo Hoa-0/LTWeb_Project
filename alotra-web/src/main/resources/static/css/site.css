@@ -1,0 +1,127 @@
+/* Smooth scroll */
+html { scroll-behavior: smooth; }
+
+:root {
+  --alotra-orange: #F1882A;
+  --alotra-orange-2: #ff7a3d;
+  --alotra-pink: #ff4e88;
+  --alotra-dark: #0b1320;
+  --text-muted: #6c757d;
+}
+
+.brand-accent { color: var(--alotra-orange) !important; }
+
+/* Navbar */
+.navbar { transition: box-shadow .2s ease; position: sticky; top: 0; z-index: 1030; }
+.navbar.stuck { box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+
+/* Mega menu: dính liền navbar, không khoảng hở */
+.navbar .dropdown-mega { position: static; }
+.navbar .dropdown-menu.mega-menu {
+  width: 100%;
+  left: 0; right: 0;
+  background: #fff;
+  border: 0;
+  margin-top: -1px;           /* ép dính sát, triệt tiêu đường hairline nếu có */
+  border-radius: 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  z-index: 1040;
+  padding: 1.25rem 1.5rem;
+}
+
+/* Desktop: hover để mở */
+@media (min-width: 992px) {
+  .dropdown-mega > .dropdown-menu {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease-in-out, visibility .15s ease-in-out;
+  }
+  .dropdown-mega:hover > .dropdown-menu,
+  .dropdown-mega:focus-within > .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.mega-menu .col-title{
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: .8rem;
+  color: var(--text-muted);
+  letter-spacing: .04em;
+  margin-bottom: .5rem;
+}
+.mega-menu a.dropdown-item-link{
+  display: block;
+  padding: .35rem 0;
+  color: #212529;
+  text-decoration: none;
+  border-radius: .25rem;
+}
+.mega-menu a.dropdown-item-link:hover{ color: var(--alotra-orange); }
+.mega-menu ul { list-style: none; padding-left: 0; margin: 0; }
+
+/* Hero */
+.hero-section {
+  min-height: 72vh;
+  background-image: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url('/images/hero.jpg');
+  background-size: cover; background-position: center; color: #fff;
+  display: flex; align-items: center; text-align: center;
+}
+
+/* CTA ghost outline (áp dụng cho cả “Xem Thực Đơn” và “Khám Phá Thêm”) */
+.btn-cta { padding: .75rem 1.25rem; border-radius: 999px; }
+.btn-ghost-light {
+  background: transparent;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,.75);
+  transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+.btn-ghost-light:hover {
+  background: rgba(255,255,255,.15);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0,0,0,.15);
+}
+
+/* Cam */
+.btn-orange { background: var(--alotra-orange); color: #fff; border: 0; }
+.btn-orange:hover { filter: brightness(.95); color: #fff; }
+
+/* Product cards */
+.product-card img { aspect-ratio: 4/3; object-fit: cover; }
+.product-card .btn { border-radius: .65rem; }
+.shadow-soft { box-shadow: 0 10px 30px rgba(0,0,0,.06); }
+
+/* Stats */
+.stats-section {
+  background: linear-gradient(90deg, var(--alotra-orange-2), var(--alotra-pink));
+  color: #fff;
+}
+.stat-number { font-size: 2rem; font-weight: 800; }
+.subscribe-box {
+  max-width: 540px; background: rgba(255,255,255,.14);
+  backdrop-filter: blur(8px); padding: 1rem; border-radius: .85rem;
+}
+
+/* Footer */
+.footer-dark { background: var(--alotra-dark); color: #fff; }
+.footer-link { color: #cbd5e1; text-decoration: none; }
+.footer-link:hover { color: #fff; }
+
+/* Logo footer: nếu logo tối màu, dùng .logo-invert để đảo sáng */
+.footer-logo { width: 32px; height: 32px; object-fit: contain; }
+.logo-invert { filter: invert(1) brightness(1.8); }
+
+/* Social icons */
+.social-icons .si {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #cbd5e1; background: rgba(255,255,255,.06);
+  transition: all .2s ease;
+  font-size: 1.1rem;
+}
+.social-icons .si:hover {
+  color: #fff; background: rgba(255,255,255,.18);
+  transform: translateY(-1px);
+}
