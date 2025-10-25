@@ -5,10 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +27,18 @@ public class SecurityConfig {
     }
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.httpFirewall(httpFirewall());
+    }
+
+    @Bean
+    public HttpFirewall httpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowSemicolon(true); // Cho phép semicolon trong URL (jsessionid)
+        return firewall;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             // Dùng UserDetailsService của bạn (tránh phải tự tạo DaoAuthenticationProvider bị warning deprecated)
@@ -30,7 +46,9 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login", "/register", "/register/**",
-                                 "/css/**", "/js/**", "/images/**").permitAll()
+                                 "/NhanVien/**", // Cho phép truy cập tự do vào NhanVien (sử dụng session riêng)
+                                 "/api/debug/**", // Cho phép truy cập debug API
+                                 "/css/**", "/js/**", "/images/**", "/webjars/**", "/static/**", "/favicon.ico", "/error").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
