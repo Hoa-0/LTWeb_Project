@@ -30,7 +30,7 @@ public class NhanVienController {
     public String showLoginPage(Model model, HttpSession session) {
         // Kiểm tra nếu đã đăng nhập rồi thì chuyển hướng đến dashboard
         if (session.getAttribute("loggedInNhanVien") != null) {
-            return "redirect:/NhanVien/dashboard";
+            return "redirect:/NhanVien/home";
         }
         
         model.addAttribute("loginRequest", new NhanVienLoginRequest());
@@ -77,7 +77,7 @@ public class NhanVienController {
                 redirectAttributes.addFlashAttribute("successMessage", 
                     "Đăng nhập thành công! Xin chào " + nhanVien.getTenNV());
                 
-                return "redirect:/NhanVien/dashboard";
+                return "redirect:/NhanVien/home";
                 
             } else {
                 log.warn("Login failed for: {}", loginRequest.getUsernameOrEmail());

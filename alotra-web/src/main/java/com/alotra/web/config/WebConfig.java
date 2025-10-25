@@ -32,6 +32,13 @@ public class WebConfig implements WebMvcConfigurer {
         // Thêm interceptor cho hệ thống nhân viên
         registry.addInterceptor(nhanVienAuthInterceptor)
                 .addPathPatterns("/NhanVien/**")
-                .excludePathPatterns("/NhanVien/login", "/NhanVien/check-session");
+        .excludePathPatterns(
+            "/NhanVien/login",
+            "/NhanVien/check-session",
+            "/NhanVien",
+            "/NhanVien/",
+            "/NhanVien/home",
+            "/NhanVien/donhang/tao"
+        );
     }
 }

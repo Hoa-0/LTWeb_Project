@@ -51,6 +51,8 @@ public class SecurityConfig {
                                  "/css/**", "/js/**", "/images/**", "/webjars/**", "/static/**", "/favicon.ico", "/error").permitAll()
                 .anyRequest().authenticated()
             )
+            // Bỏ qua CSRF cho khu vực NhanVien vì đang dùng Interceptor session-based và API POS gọi từ fetch
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/NhanVien/**"))
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")

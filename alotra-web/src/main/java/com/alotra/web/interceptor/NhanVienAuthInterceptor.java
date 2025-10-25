@@ -15,13 +15,17 @@ public class NhanVienAuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestURI = request.getRequestURI();
         
-        // Các đường dẫn không cần xác thực
-        if (requestURI.equals("/NhanVien/login") || 
-            requestURI.startsWith("/css/") || 
-            requestURI.startsWith("/js/") || 
+        // Các đường dẫn không cần xác thực (public POS + static)
+        if (requestURI.equals("/NhanVien/login") ||
+            requestURI.equals("/NhanVien") ||
+            requestURI.equals("/NhanVien/") ||
+            requestURI.startsWith("/NhanVien/home") ||
+            requestURI.equals("/NhanVien/donhang/tao") ||
+            requestURI.startsWith("/NhanVien/check-session") ||
+            requestURI.startsWith("/css/") ||
+            requestURI.startsWith("/js/") ||
             requestURI.startsWith("/images/") ||
-            requestURI.equals("/favicon.ico") ||
-            requestURI.startsWith("/NhanVien/check-session")) {
+            requestURI.equals("/favicon.ico")) {
             return true;
         }
         

@@ -48,6 +48,18 @@ public class SanPhamServiceImpl implements SanPhamService {
     public Page<SanPham> getAllSanPham(Pageable pageable) {
         return sanPhamRepository.findAllActive(pageable);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SanPham> getActiveSanPham(Pageable pageable) {
+        return sanPhamRepository.findByTrangThaiAndNotDeleted((byte) 1, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<SanPham> getActiveSanPhamByCategory(Integer maDM, Pageable pageable) {
+        return sanPhamRepository.findActiveByMaDM(maDM, pageable);
+    }
     
     @Override
     @Transactional(readOnly = true)

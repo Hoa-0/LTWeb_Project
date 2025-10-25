@@ -8,9 +8,22 @@
 </head>
 <body>
     <div layout:fragment="content" data-page="donhang">
+        <!-- Alerts -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}">Thành công</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}">Có lỗi xảy ra</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${warn}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <span th:text="${warn}">Cảnh báo</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold text-dark">
-                <i class="fas fa-receipt me-2"></i>Chi tiết đơn hàng #DH001
+                <i class="fas fa-receipt me-2"></i>Chi tiết đơn hàng <span th:text="${'#' + order.maDH}">#</span>
             </h2>
             <a href="/NhanVien/donhang" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i>Quay lại
@@ -27,14 +40,17 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Mã đơn hàng:</strong> #DH001</p>
-                                <p><strong>Ngày đặt:</strong> 15/01/2024 10:30</p>
-                                <p><strong>Trạng thái:</strong> <span class="badge bg-warning">Chờ xử lý</span></p>
+                                <p><strong>Mã đơn hàng:</strong> <span th:text="${'#' + order.maDH}">#</span></p>
+                                <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.ngayLap, 'dd/MM/yyyy HH:mm')}">-</span></p>
+                                <p><strong>Trạng thái:</strong>
+                                    <span th:classappend="${order.trangThaiDonHang == 'DaGiao' ? 'badge bg-success' : (order.trangThaiDonHang == 'DangGiao' ? 'badge bg-info' : (order.trangThaiDonHang == 'DaHuy' ? 'badge bg-danger' : 'badge bg-warning'))}"
+                                          th:text="${order.trangThaiDonHang}">Trạng thái</span>
+                                </p>
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Phương thức thanh toán:</strong> COD</p>
-                                <p><strong>Phí ship:</strong> 25,000đ</p>
-                                <p><strong>Tổng tiền:</strong> <strong class="text-success">275,000đ</strong></p>
+                                <p><strong>Phương thức thanh toán:</strong> <span th:text="${order.paymentMethod}">-</span></p>
+                                <p><strong>Phí ship:</strong> <span th:text="${#numbers.formatDecimal(order.phiVanChuyen, 0, 'POINT', 0, 'COMMA')}">0</span></p>
+                                <p><strong>Tổng tiền:</strong> <strong class="text-success" th:text="${#numbers.formatDecimal(order.tongThanhToan, 0, 'POINT', 0, 'COMMA')}">0</strong></p>
                             </div>
                         </div>
                     </div>
@@ -58,49 +74,34 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    <tr th:each="ct : ${lines}">
                                         <td>
                                             <div class="d-flex align-items-center">
-                                       <img th:src="@{/images/tra-sua-1.jpg}" 
-                                                     alt="Trà sữa truyền thống" 
-                                                     class="rounded me-3" 
-                                                     style="width: 50px; height: 50px; object-fit: cover;">
-                                                <span>Trà sữa truyền thống</span>
+                                                <span th:text="${'Biến thể #' + ct.maBT}">SP</span>
+                                            </div>
+                                            <div class="mt-1 small text-muted" th:if="${toppingsByLine[ct.maCT] != null && !#lists.isEmpty(toppingsByLine[ct.maCT])}">
+                                                <i class="fas fa-plus-circle me-1"></i>
+                                                <span th:each="tp,iter : ${toppingsByLine[ct.maCT]}" th:text="${tp.id.maTopping + ' x' + tp.soLuong + (iter.last ? '' : ', ')}">Topping</span>
                                             </div>
                                         </td>
-                                        <td>Size L</td>
-                                        <td>2</td>
-                                        <td>45,000đ</td>
-                                        <td>90,000đ</td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                       <img th:src="@{/images/tra-sua-2.jpg}" 
-                                                     alt="Trà sữa matcha" 
-                                                     class="rounded me-3" 
-                                                     style="width: 50px; height: 50px; object-fit: cover;">
-                                                <span>Trà sữa matcha</span>
-                                            </div>
-                                        </td>
-                                        <td>Size M</td>
-                                        <td>4</td>
-                                        <td>40,000đ</td>
-                                        <td>160,000đ</td>
+                                        <td>-</td>
+                                        <td th:text="${ct.soLuong}">0</td>
+                                        <td th:text="${#numbers.formatDecimal(ct.donGia, 0, 'POINT', 0, 'COMMA')}">0</td>
+                                        <td th:text="${#numbers.formatDecimal(ct.thanhTien, 0, 'POINT', 0, 'COMMA')}">0</td>
                                     </tr>
                                 </tbody>
                                 <tfoot>
                                     <tr class="table-active">
                                         <td colspan="4" class="text-end"><strong>Tổng cộng:</strong></td>
-                                        <td><strong>250,000đ</strong></td>
+                                        <td><strong th:text="${#numbers.formatDecimal(order.tongHang, 0, 'POINT', 0, 'COMMA')}">0</strong></td>
                                     </tr>
                                     <tr class="table-active">
                                         <td colspan="4" class="text-end"><strong>Phí ship:</strong></td>
-                                        <td><strong>25,000đ</strong></td>
+                                        <td><strong th:text="${#numbers.formatDecimal(order.phiVanChuyen, 0, 'POINT', 0, 'COMMA')}">0</strong></td>
                                     </tr>
                                     <tr class="table-success">
                                         <td colspan="4" class="text-end"><strong>Tổng thanh toán:</strong></td>
-                                        <td><strong class="text-success">275,000đ</strong></td>
+                                        <td><strong class="text-success" th:text="${#numbers.formatDecimal(order.tongThanhToan, 0, 'POINT', 0, 'COMMA')}">0</strong></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -116,13 +117,11 @@
                         <h5 class="card-title mb-0">Thông tin khách hàng</h5>
                     </div>
                     <div class="card-body">
-                        <p><strong>Họ tên:</strong> Nguyễn Văn A</p>
-                        <p><strong>Số điện thoại:</strong> 0123456789</p>
-                        <p><strong>Email:</strong> nguyenvana@email.com</p>
-                        <p><strong>Địa chỉ giao hàng:</strong><br>
-                           123 Đường ABC, Phường XYZ<br>
-                           Quận 1, TP.HCM</p>
-                        <p><strong>Ghi chú:</strong> Giao hàng giờ hành chính</p>
+                                <p><strong>Họ tên:</strong> <span th:text="${order.tenNguoiNhan != null ? order.tenNguoiNhan : ('KH' + order.maKH)}">-</span></p>
+                                <p><strong>Số điện thoại:</strong> <span th:text="${order.sdtNguoiNhan}">-</span></p>
+                                <p><strong>Địa chỉ giao hàng:</strong><br>
+                                    <span th:text="${order.diaChiNhanHang}">-</span></p>
+                                <p><strong>Ghi chú:</strong> <span th:text="${order.ghiChu}">-</span></p>
                     </div>
                 </div>
 
@@ -132,23 +131,76 @@
                         <h5 class="card-title mb-0">Thao tác</h5>
                     </div>
                     <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-success">
-                                <i class="fas fa-check me-1"></i>Xác nhận đơn hàng
-                            </button>
-                            <button class="btn btn-info">
-                                <i class="fas fa-truck me-1"></i>Cập nhật giao hàng
-                            </button>
-                            <button class="btn btn-warning">
-                                <i class="fas fa-edit me-1"></i>Chỉnh sửa
-                            </button>
-                            <button class="btn btn-danger">
-                                <i class="fas fa-times me-1"></i>Hủy đơn hàng
-                            </button>
-                            <button class="btn btn-secondary">
-                                <i class="fas fa-print me-1"></i>In đơn hàng
-                            </button>
-                        </div>
+                        <form th:action="@{'/NhanVien/donhang/action/' + ${order.maDH}}" method="post" id="orderActionForm">
+                            <input type="hidden" name="action" id="orderActionInput" />
+
+                            <div class="d-grid gap-2">
+                                <!-- Xác nhận đơn hàng -->
+                <button type="button"
+                    class="btn btn-success"
+                    data-action="confirm"
+                    th:disabled="${isDelivered or isCancelled}">
+                                    <i class="fas fa-check me-1"></i>Xác nhận đơn hàng
+                                </button>
+
+                                <!-- Cập nhật giao hàng (tiến trình) -->
+                                <button type="button"
+                                        class="btn btn-info"
+                                        data-action="progress"
+                                        th:disabled="${!(order.trangThaiDonHang == 'DangXuLy' || order.trangThaiDonHang == 'DangGiao')}">
+                                    <i class="fas fa-truck me-1"></i>Cập nhật giao hàng
+                                </button>
+
+                                <!-- Chỉnh sửa: điều hướng (nếu có trang chỉnh sửa) -->
+                                <a class="btn btn-warning" th:href="@{'/NhanVien/donhang/chi-tiet/' + ${order.maDH}}">
+                                    <i class="fas fa-edit me-1"></i>Chỉnh sửa
+                                </a>
+
+                                <!-- Hủy đơn -->
+                <button type="button"
+                    class="btn btn-danger"
+                    data-action="cancel"
+                    th:disabled="${isDelivered or isCancelled}">
+                                    <i class="fas fa-times me-1"></i>Hủy đơn hàng
+                                </button>
+
+                                <!-- In đơn -->
+                                <a class="btn btn-secondary" th:href="@{'/NhanVien/donhang/in/' + ${order.maDH}}" target="_blank">
+                                    <i class="fas fa-print me-1"></i>In đơn hàng
+                                </a>
+
+                                <!-- Thanh toán: hiển thị nếu muốn -->
+                                <div class="d-flex gap-2 mt-2">
+                                    <button type="button" class="btn btn-outline-success flex-fill" data-action="markPaid"
+                                            th:disabled="${order.paymentStatus == 'DaThanhToan'}">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Đánh dấu đã thanh toán
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary flex-fill" data-action="markUnpaid"
+                                            th:disabled="${order.paymentStatus == 'ChuaThanhToan'}">
+                                        <i class="fas fa-undo me-1"></i>Chuyển về chưa thanh toán
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <script>
+                            (function() {
+                                const form = document.getElementById('orderActionForm');
+                                const input = document.getElementById('orderActionInput');
+                                if (!form || !input) return;
+                                form.addEventListener('click', function(e) {
+                                    const btn = e.target.closest('[data-action]');
+                                    if (!btn) return;
+                                    const action = btn.getAttribute('data-action');
+                                    if (!action || btn.disabled) return;
+                                    // Confirm dangerous actions
+                                    if (action === 'cancel') {
+                                        if (!confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
+                                    }
+                                    input.value = action;
+                                    form.submit();
+                                });
+                            })();
+                        </script>
                     </div>
                 </div>
             </div>
