@@ -237,42 +237,113 @@
             </div>
         </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Bạn có chắc chắn muốn xóa sản phẩm <strong id="deleteProductName"></strong>?</p>
-                    <p class="text-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Thao tác này không thể hoàn tác!
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <form id="deleteForm" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash me-2"></i>Xóa
-                        </button>
-                    </form>
+    
+    <!-- Modal Fragment - Outside content -->
+    <th:block layout:fragment="modals">
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn xóa sản phẩm <strong id="deleteProductName"></strong>?</p>
+                        <p class="text-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Thao tác này không thể hoàn tác!
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <form id="deleteForm" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Xóa
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </th:block>
 
-    <script>
-        function confirmDelete(maSP, tenSP) {
-            document.getElementById('deleteProductName').textContent = tenSP;
-            document.getElementById('deleteForm').action = '/NhanVien/san-pham/xoa/' + maSP;
+    <!-- JavaScript Fragment -->
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            // Global function for delete confirmation
+            window.confirmDelete = function(maSP, tenSP) {
+                // Create modal HTML if it doesn't exist
+                if (!document.getElementById('deleteModal')) {
+                    createDeleteModal();
+                }
+                
+                var productNameElement = document.getElementById('deleteProductName');
+                var deleteFormElement = document.getElementById('deleteForm');
+                var modalElement = document.getElementById('deleteModal');
+                
+                if (!productNameElement || !deleteFormElement || !modalElement) {
+                    console.error('Modal elements not found');
+                    if (confirm('Bạn có chắc chắn muốn xóa sản phẩm "' + tenSP + '"?')) {
+                        // Fallback: direct form submission
+                        var form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/NhanVien/san-pham/xoa/' + maSP;
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                    return;
+                }
+                
+                productNameElement.textContent = tenSP;
+                
+                // Use direct URL path
+                var deleteUrl = '/NhanVien/san-pham/xoa/' + maSP;
+                deleteFormElement.action = deleteUrl;
+                
+                var modal = new bootstrap.Modal(modalElement);
+                modal.show();
+            };
             
-            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            modal.show();
-        }
-    </script>
+            // Function to create modal dynamically if needed
+            function createDeleteModal() {
+                var modalHTML = `
+                    <div class="modal fade" id="deleteModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Xác nhận xóa sản phẩm</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Bạn có chắc chắn muốn xóa sản phẩm <strong id="deleteProductName"></strong>?</p>
+                                    <p class="text-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Thao tác này không thể hoàn tác!
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <form id="deleteForm" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fas fa-trash me-2"></i>Xóa
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+            
+            // Ensure DOM is loaded before any interactions
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('Delete modal functionality initialized');
+            });
+            /*]]>*/
+        </script>
+    </th:block>
 </body>
 </html>

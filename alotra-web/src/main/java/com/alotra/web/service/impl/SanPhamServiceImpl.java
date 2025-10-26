@@ -44,6 +44,12 @@ public class SanPhamServiceImpl implements SanPhamService {
     private com.alotra.web.service.CloudinaryService cloudinaryService;
     private final com.alotra.web.repository.ProductMediaRepository productMediaRepository;
     
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
+    
+    @Autowired(required = false)
+    private com.alotra.web.repository.KhuyenMaiSanPhamRepository khuyenMaiSanPhamRepository;
+    
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
     
@@ -264,21 +270,58 @@ public class SanPhamServiceImpl implements SanPhamService {
         log.info("Hard deleting product with ID: {}", maSP);
         
         Optional<SanPham> sanPhamOpt = getSanPhamById(maSP);
-        if (sanPhamOpt.isPresent()) {
-            SanPham sanPham = sanPhamOpt.get();
+        if (sanPhamOpt.isEmpty()) {
+            throw new RuntimeException("Sản phẩm không tồn tại");
+        }
+        
+        SanPham sanPham = sanPhamOpt.get();
+        
+        try {
+            // 1. Kiểm tra xem sản phẩm có đang được sử dụng trong đơn hàng không
+            if (isProductUsedInOrders(maSP)) {
+                throw new RuntimeException("Không thể xóa sản phẩm này vì đã có trong đơn hàng. Chỉ có thể ngừng bán.");
+            }
             
-            // Xóa ảnh
+            // 2. Xóa ảnh từ storage
             if (sanPham.getUrlAnh() != null) {
                 deleteImage(sanPham.getUrlAnh());
             }
             
-            // Xóa biến thể
-            bienTheRepository.deleteByMaSP(maSP);
+            // 3. Xóa các ProductMedia liên quan
+            try {
+                productMediaRepository.deleteByProductId(maSP);
+                log.info("Deleted product media for product: {}", maSP);
+            } catch (Exception e) {
+                log.warn("Unable to delete product media for product {}: {}", maSP, e.getMessage());
+            }
             
-            // Xóa sản phẩm
+            // 4. Xóa các biến thể trước (để tránh foreign key constraint)
+            bienTheRepository.deleteByMaSP(maSP);
+            log.info("Deleted product variants for product: {}", maSP);
+            
+            // 5. Xóa khuyến mãi sản phẩm (nếu có)
+            try {
+                // Giả sử có KhuyenMaiSanPhamRepository
+                deletePromotionProducts(maSP);
+                log.info("Deleted promotion products for product: {}", maSP);
+            } catch (Exception e) {
+                log.warn("Unable to delete promotion products for product {}: {}", maSP, e.getMessage());
+            }
+            
+            // 6. Cuối cùng xóa sản phẩm
             sanPhamRepository.delete(sanPham);
             
             log.info("Product hard deleted successfully: {}", maSP);
+            
+        } catch (Exception e) {
+            log.error("Error deleting product {}: {}", maSP, e.getMessage());
+            if (e.getMessage().contains("foreign key constraint") || 
+                e.getMessage().contains("constraint violation") ||
+                e.getMessage().contains("referential integrity")) {
+                throw new RuntimeException("Không thể xóa sản phẩm này vì đang được tham chiếu bởi dữ liệu khác. Vui lòng sử dụng 'Ngừng bán' thay vì xóa.");
+            } else {
+                throw new RuntimeException("Lỗi khi xóa sản phẩm: " + e.getMessage());
+            }
         }
     }
     
@@ -474,5 +517,64 @@ public class SanPhamServiceImpl implements SanPhamService {
     private byte safeStatus(Byte input, byte defaultValue) {
         if (input == null) return defaultValue;
         return (input == 1) ? (byte) 1 : (byte) 0;
+    }
+    
+    /**
+     * Kiểm tra xem sản phẩm có đang được sử dụng trong đơn hàng không
+     */
+    private boolean isProductUsedInOrders(Integer maSP) {
+        try {
+            // Kiểm tra thông qua biến thể sản phẩm trong CTDonHang
+            List<BienTheSanPham> bienThes = bienTheRepository.findByMaSP(maSP);
+            for (BienTheSanPham bt : bienThes) {
+                // Nếu có CTDonHang tham chiếu đến biến thể này thì không được xóa
+                if (isVariantUsedInOrders(bt.getMaBT())) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            log.warn("Error checking product usage in orders: {}", e.getMessage());
+            // Nếu có lỗi thì coi như đang được sử dụng để an toàn
+            return true;
+        }
+    }
+    
+    /**
+     * Kiểm tra xem biến thể có đang được sử dụng trong đơn hàng không
+     */
+    private boolean isVariantUsedInOrders(Integer maBT) {
+        try {
+            // Sử dụng EntityManager để kiểm tra CTDonHang
+            Long count = entityManager.createQuery(
+                "SELECT COUNT(ct) FROM CTDonHang ct WHERE ct.maBT = :maBT", 
+                Long.class)
+                .setParameter("maBT", maBT)
+                .getSingleResult();
+            
+            return count > 0;
+        } catch (Exception e) {
+            log.warn("Error checking variant usage in orders: {}", e.getMessage());
+            // Nếu không có entity CTDonHang hoặc có lỗi, coi như không được sử dụng
+            // để không chặn việc xóa
+            return false;
+        }
+    }
+    
+    /**
+     * Xóa các khuyến mãi sản phẩm liên quan
+     */
+    private void deletePromotionProducts(Integer maSP) {
+        try {
+            if (khuyenMaiSanPhamRepository != null) {
+                khuyenMaiSanPhamRepository.deleteByMaSP(maSP);
+                log.info("Deleted promotion products for product: {}", maSP);
+            } else {
+                log.info("KhuyenMaiSanPhamRepository not available, skip deleting promotion products");
+            }
+        } catch (Exception e) {
+            log.warn("Error deleting promotion products: {}", e.getMessage());
+            throw e;
+        }
     }
 }

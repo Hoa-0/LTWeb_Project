@@ -28,6 +28,7 @@ public class PosOrderServiceImpl implements PosOrderService {
     private final BienTheSanPhamRepository bienTheSanPhamRepository;
     private final ToppingRepository toppingRepository;
     private final com.alotra.web.service.OrderStatusResolver statusResolver;
+    private final KhuyenMaiSanPhamRepository khuyenMaiSanPhamRepository;
 
     @Value("${app.pos.guest-customer-id:1}")
     private Integer guestCustomerId;
@@ -119,7 +120,22 @@ public class PosOrderServiceImpl implements PosOrderService {
                 }
             }
 
-            BigDecimal giamGiaDong = nz(item.getGiamGiaDong()).setScale(2, RoundingMode.HALF_UP);
+            // Tính giảm giá tự động theo khuyến mãi hiện hành (nếu có) trên SẢN PHẨM (không áp dụng cho topping)
+            int percent = 0;
+            try {
+                Integer p = khuyenMaiSanPhamRepository.findActiveDiscountPercentForProduct(bt.getMaSP(), java.time.LocalDate.now());
+                if (p != null) percent = Math.max(0, Math.min(100, p));
+            } catch (Exception ex) {
+                log.warn("Không thể lấy khuyến mãi cho MaSP={}: {}", bt.getMaSP(), ex.getMessage());
+            }
+
+            BigDecimal giamGiaDong;
+            if (percent > 0) {
+                BigDecimal perUnitDiscount = donGia.multiply(BigDecimal.valueOf(percent)).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                giamGiaDong = perUnitDiscount.multiply(BigDecimal.valueOf(item.getSoLuong())).setScale(2, RoundingMode.HALF_UP);
+            } else {
+                giamGiaDong = nz(item.getGiamGiaDong()).setScale(2, RoundingMode.HALF_UP);
+            }
             BigDecimal soLuong = BigDecimal.valueOf(item.getSoLuong());
             BigDecimal lineSubtotal = donGia.add(toppingPerUnit).multiply(soLuong);
             BigDecimal thanhTien = lineSubtotal.subtract(giamGiaDong);

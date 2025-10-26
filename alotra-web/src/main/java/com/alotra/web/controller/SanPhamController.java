@@ -356,12 +356,69 @@ public class SanPhamController {
     
     
     /**
-     * Xóa sản phẩm (soft delete)
+     * Xóa sản phẩm (hard delete) 
      */
     @PostMapping("/xoa/{maSP}")
     public String deleteSanPham(@PathVariable Integer maSP,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
+        
+        // Kiểm tra đăng nhập
+        if (session.getAttribute("loggedInNhanVien") == null) {
+            return "redirect:/NhanVien/login";
+        }
+        
+        try {
+            Optional<SanPham> sanPhamOpt = sanPhamService.getSanPhamById(maSP);
+            if (sanPhamOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm!");
+                return "redirect:/NhanVien/san-pham";
+            }
+            
+            String tenSP = sanPhamOpt.get().getTenSP();
+            
+            // Thử xóa cứng sản phẩm
+            sanPhamService.deleteSanPham(maSP);
+            
+            log.info("Product hard deleted by employee {}: {}", 
+                    session.getAttribute("nhanVienUsername"), maSP);
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                    "Xóa sản phẩm '" + tenSP + "' thành công!");
+            
+        } catch (RuntimeException e) {
+            log.error("Error deleting product: {}", maSP, e);
+            
+            // Nếu lỗi do ràng buộc, đề xuất dùng soft delete
+            if (e.getMessage().contains("đang được tham chiếu") || 
+                e.getMessage().contains("đã có trong đơn hàng") ||
+                e.getMessage().contains("constraint") ||
+                e.getMessage().contains("referential integrity")) {
+                
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                        "Không thể xóa sản phẩm: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("warningMessage", 
+                        "Gợi ý: Sử dụng tính năng 'Ngừng bán' thay vì xóa.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                        "Có lỗi khi xóa sản phẩm: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            log.error("Unexpected error deleting product: {}", maSP, e);
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                    "Có lỗi không mong muốn khi xóa sản phẩm. Vui lòng thử lại.");
+        }
+        
+        return "redirect:/NhanVien/san-pham";
+    }
+    
+    /**
+     * Ngừng bán sản phẩm (soft delete) - Alternative to hard delete
+     */
+    @PostMapping("/ngung-ban/{maSP}")
+    public String stopSellingProduct(@PathVariable Integer maSP,
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
         
         // Kiểm tra đăng nhập
         if (session.getAttribute("loggedInNhanVien") == null) {
@@ -382,15 +439,15 @@ public class SanPhamController {
                     session.getAttribute("nhanVienUsername"), maSP);
             
             redirectAttributes.addFlashAttribute("successMessage", 
-                    "Xóa sản phẩm '" + tenSP + "' thành công!");
+                    "Ngừng bán sản phẩm '" + tenSP + "' thành công!");
             
         } catch (Exception e) {
-            log.error("Error deleting product: {}", maSP, e);
+            log.error("Error soft deleting product: {}", maSP, e);
             redirectAttributes.addFlashAttribute("errorMessage", 
-                    "Có lỗi khi xóa sản phẩm: " + e.getMessage());
+                    "Có lỗi khi ngừng bán sản phẩm: " + e.getMessage());
         }
         
-    return "redirect:/NhanVien/san-pham";
+        return "redirect:/NhanVien/san-pham";
     }
     
     /**
