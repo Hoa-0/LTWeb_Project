@@ -1,43 +1,34 @@
 package com.alotra.web.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "CTDonHang_Topping")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CTDonHangTopping {
+
     @EmbeddedId
-    private CTDonHangToppingId id = new CTDonHangToppingId();
+    private CTDonHangToppingId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("ctId")
-    @JoinColumn(name = "MaCT")
-    private CTDonHang orderLine;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("toppingId")
-    @JoinColumn(name = "MaTopping")
-    private Topping topping;
+    @MapsId("maCT")
+    @JoinColumn(name = "MaCT", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private CTDonHang chiTietDonHang;
 
     @Column(name = "SoLuong", nullable = false)
-    private Integer quantity = 1;
+    private Integer soLuong;
 
-    @Column(name = "DonGia", nullable = false)
-    private BigDecimal unitPrice;
+    @Column(name = "DonGia", precision = 10, scale = 2, nullable = false)
+    private BigDecimal donGia;
 
-    @Column(name = "ThanhTien", nullable = false)
-    private BigDecimal lineTotal;
-
-    public CTDonHangToppingId getId() { return id; }
-    public void setId(CTDonHangToppingId id) { this.id = id; }
-    public CTDonHang getOrderLine() { return orderLine; }
-    public void setOrderLine(CTDonHang orderLine) { this.orderLine = orderLine; }
-    public Topping getTopping() { return topping; }
-    public void setTopping(Topping topping) { this.topping = topping; }
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
-    public BigDecimal getUnitPrice() { return unitPrice; }
-    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
-    public BigDecimal getLineTotal() { return lineTotal; }
-    public void setLineTotal(BigDecimal lineTotal) { this.lineTotal = lineTotal; }
+    @Column(name = "ThanhTien", precision = 10, scale = 2, nullable = false)
+    private BigDecimal thanhTien;
 }

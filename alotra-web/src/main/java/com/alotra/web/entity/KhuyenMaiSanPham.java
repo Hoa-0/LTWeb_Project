@@ -1,32 +1,34 @@
 package com.alotra.web.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "KhuyenMaiSanPham")
+@IdClass(KhuyenMaiSanPhamId.class)
 public class KhuyenMaiSanPham {
-    @EmbeddedId
-    private KhuyenMaiSanPhamId id = new KhuyenMaiSanPhamId();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("promotionId")
-    @JoinColumn(name = "MaKM")
-    private SuKienKhuyenMai promotion;
+    @Id
+    @Column(name = "MaKM")
+    private Integer maKM;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("productId")
-    @JoinColumn(name = "MaSP")
-    private Product product;
+    @Id
+    @Column(name = "MaSP")
+    private Integer maSP;
 
     @Column(name = "PhanTramGiam", nullable = false)
-    private Integer discountPercent;
+    private Integer phanTramGiam;
 
-    public KhuyenMaiSanPhamId getId() { return id; }
-    public void setId(KhuyenMaiSanPhamId id) { this.id = id; }
-    public SuKienKhuyenMai getPromotion() { return promotion; }
-    public void setPromotion(SuKienKhuyenMai promotion) { this.promotion = promotion; }
-    public Product getProduct() { return product; }
-    public void setProduct(Product product) { this.product = product; }
-    public Integer getDiscountPercent() { return discountPercent; }
-    public void setDiscountPercent(Integer discountPercent) { this.discountPercent = discountPercent; }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaKM", insertable = false, updatable = false)
+    private SuKienKhuyenMai suKien;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaSP", insertable = false, updatable = false)
+    private SanPham sanPham;
 }

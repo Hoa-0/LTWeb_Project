@@ -1,70 +1,58 @@
 package com.alotra.web.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import org.springframework.format.annotation.DateTimeFormat;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "SuKienKhuyenMai")
 public class SuKienKhuyenMai {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MaKM")
-    private Integer id;
+    private Integer maKM;
 
-    @Column(name = "TenSuKien", nullable = false)
-    private String name;
+    @Column(name = "TenSuKien", nullable = false, length = 255)
+    private String tenSuKien;
 
-    @Column(name = "MoTa")
-    private String description;
+    @Column(name = "MoTa", length = 255)
+    private String moTa;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "NgayBD", nullable = false)
-    private LocalDate startDate;
+    private LocalDate ngayBD;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "NgayKT", nullable = false)
-    private LocalDate endDate;
+    private LocalDate ngayKT;
 
     @Column(name = "TrangThai", nullable = false)
-    private Integer status = 1; // 0: inactive, 1: active
+    private Byte trangThai; // 1: Active, 0: Inactive
 
-    // New: banner image and view counter
     @Column(name = "UrlAnh")
-    private String imageUrl;
+    private String urlAnh;
 
     @Column(name = "LuotXem")
-    private Integer views;
+    private Integer luotXem;
 
-    // New: soft delete timestamp (null = active)
     @Column(name = "DeletedAt")
     private LocalDateTime deletedAt;
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    @Transient
+    public boolean isExpired() {
+        return ngayKT != null && ngayKT.isBefore(LocalDate.now());
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-
-    public Integer getStatus() { return status; }
-    public void setStatus(Integer status) { this.status = status; }
-
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
-    public Integer getViews() { return views; }
-    public void setViews(Integer views) { this.views = views; }
-
-    public LocalDateTime getDeletedAt() { return deletedAt; }
-    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+    @Transient
+    public boolean isActiveNow() {
+        LocalDate today = LocalDate.now();
+        return (trangThai != null && trangThai == 1) && deletedAt == null && ngayBD != null && ngayKT != null
+                && (!today.isBefore(ngayBD)) && (!today.isAfter(ngayKT));
+    }
 }

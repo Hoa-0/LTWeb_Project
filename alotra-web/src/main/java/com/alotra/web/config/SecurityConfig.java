@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 <<<<<<< HEAD
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -94,6 +93,8 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
 >>>>>>> e66511f5f76c02a6c7a92993afb90a3d8655037c
             )
+            // Bỏ qua CSRF cho khu vực NhanVien vì đang dùng Interceptor session-based và API POS gọi từ fetch
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/NhanVien/**"))
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")

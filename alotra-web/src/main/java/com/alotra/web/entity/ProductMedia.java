@@ -1,9 +1,15 @@
 package com.alotra.web.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "ProductMedia")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductMedia {
 
     @Id
@@ -11,24 +17,12 @@ public class ProductMedia {
     @Column(name = "Id")
     private Long id;
 
-    @Column(name = "Url", nullable = false)
+    @Column(name = "IsPrimary")
+    private Boolean isPrimary;
+
+    @Column(name = "Url", length = 255, nullable = false)
     private String url;
 
-    @Column(name = "IsPrimary")
-    private boolean isPrimary;
-
-    // Mối quan hệ: Nhiều media thuộc về một sản phẩm
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ProductId", nullable = false)
-    private Product product;
-
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getUrl() { return url; }
-    public void setUrl(String url) { this.url = url; }
-    public boolean isPrimary() { return isPrimary; }
-    public void setPrimary(boolean isPrimary) { this.isPrimary = isPrimary; }
-    public Product getProduct() { return product; }
-    public void setProduct(Product product) { this.product = product; }
+    @Column(name = "ProductId", nullable = false)
+    private Integer productId;
 }

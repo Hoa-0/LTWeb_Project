@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle} ?: 'Menu tại quầy'">Menu tại quầy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        body { background: #fafafa; }
+        .navbar-brand { font-weight: 700; }
+        .product-card {
+            border: none; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+            transition: transform .15s ease, box-shadow .15s ease;
+            height: 100%;
+        }
+        .product-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.1); }
+        .product-img { width: 100%; height: 180px; object-fit: cover; background: #f1f1f1; }
+        .size-chip { font-size: .85rem; margin: .15rem; }
+        .category-pill { cursor: pointer; }
+        .sticky-topbar { position: sticky; top: 0; z-index: 1030; }
+        /* Cart */
+        .cart-panel { position: sticky; top: 80px; }
+        .cart-card { border: none; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+        .cart-card.has-discount { border: 1px solid #dc3545; box-shadow: 0 0 0 .15rem rgba(220,53,69,.08); }
+        .cart-item { border-bottom: 1px dashed #e9ecef; padding-bottom: .75rem; margin-bottom: .75rem; }
+        .cart-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .topping-badge { font-size: .75rem; background: #f1f3f5; margin-right: .25rem; }
+        .price { font-weight: 700; }
+        .btn-qty { width: 28px; height: 28px; padding: 0; }
+        .modal-lg { max-width: 900px; }
+        .promo-line { color: #dc3545; font-size: .85rem; }
+    </style>
+</head>
+<body>
+    <!-- Top bar -->
+    <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-topbar">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/NhanVien/home}"><i class="fa-solid fa-mug-hot me-2"></i>Menu tại quầy</a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <th:block th:if="${session.loggedInNhanVien == null}">
+                    <a class="btn btn-outline-primary" th:href="@{/NhanVien/login}"><i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập nhân viên</a>
+                </th:block>
+                <th:block th:if="${session.loggedInNhanVien != null}">
+                    <a class="btn btn-primary" th:href="@{/NhanVien/dashboard}"><i class="fa-solid fa-gauge me-1"></i> Vào Dashboard</a>
+                </th:block>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4">
+        <!-- Alerts -->
+        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+        <div class="row g-4">
+            <!-- LEFT: Products -->
+            <div class="col-12 col-lg-8">
+                <!-- Categories -->
+                <div class="mb-3 d-flex flex-wrap gap-2">
+                    <a class="btn btn-sm btn-outline-secondary category-pill"
+                       th:classappend="${selectedMaDM == null} ? ' active'"
+                       th:href="@{/NhanVien/home}">Tất cả</a>
+                    <a class="btn btn-sm btn-outline-secondary category-pill"
+                       th:each="dm : ${categories}"
+                       th:text="${dm.tenDM}"
+                       th:classappend="${selectedMaDM == dm.maDM} ? ' active'"
+                       th:href="@{'/NhanVien/home'(maDM=${dm.maDM})}"></a>
+                </div>
+
+                <!-- Products grid -->
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6 col-md-4" th:each="p : ${products}">
+                        <div class="card product-card h-100">
+                            <img class="product-img" th:if="${p.urlAnh}" th:src="${p.urlAnh}" th:alt="${p.tenSP}" />
+                            <div class="ratio ratio-16x9 bg-light d-flex align-items-center justify-content-center" th:if="${p.urlAnh == null}">
+                                <i class="fa-regular fa-image text-muted"></i>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title mb-1" th:text="${p.tenSP}">Tên SP</h6>
+                                <p class="text-muted small mb-2" th:text="${p.moTa}">Mô tả</p>
+                                <div class="mb-2" th:if="${discountPercents != null and discountPercents[p.maSP] != null and discountPercents[p.maSP] > 0}">
+                                    <span class="badge rounded-pill text-bg-danger">
+                                        <i class="fa-solid fa-tag me-1"></i> Giảm <span th:text="${discountPercents[p.maSP]}">0</span>%
+                                    </span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge rounded-pill text-bg-light size-chip"
+                                          th:each="bt : ${p.bienThes}"
+                                          th:if="${bt.trangThai == 1}"
+                                          th:text="${bt.tenSize + ' - ' + #numbers.formatDecimal(bt.giaBan, 0, 'COMMA', 0, 'POINT') + 'đ'}">
+                                        Size - Giá
+                                    </span>
+                                </div>
+                                <div class="mt-auto">
+                                    <button class="btn btn-sm btn-primary w-100 btn-add"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#addModal"
+                                            th:data-masp="${p.maSP}"
+                                            th:data-tensp="${p.tenSP}">
+                                        Chọn
+                                    </button>
+                                </div>
+
+                                <!-- Hidden variants data for JS -->
+                                <div class="d-none variants"
+                                     th:each="bt : ${p.bienThes}"
+                                     th:data-ma-bt="${bt.maBT}"
+                                     th:data-ten-size="${bt.tenSize}"
+                                     th:data-gia-ban="${bt.giaBan}"
+                                     th:data-trang-thai="${bt.trangThai}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination (simple) -->
+                <nav class="mt-4" th:if="${totalPages > 1}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{'/NhanVien/home'(page=${currentPage-1}, maDM=${selectedMaDM})}">Trước</a>
+                        </li>
+                        <li class="page-item disabled"><span class="page-link" th:text="${currentPage+1} + ' / ' + ${totalPages}"></span></li>
+                        <li class="page-item" th:classappend="${currentPage+1 >= totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{'/NhanVien/home'(page=${currentPage+1}, maDM=${selectedMaDM})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- RIGHT: Cart & Checkout -->
+            <div class="col-12 col-lg-4">
+                <div class="cart-panel">
+                    <div class="card cart-card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <div class="fw-bold"><i class="fa-solid fa-receipt me-2"></i>Đơn tại quầy</div>
+                            <button class="btn btn-sm btn-outline-danger" id="btnClearCart">
+                                <i class="fa-solid fa-trash-can me-1"></i> Xóa đơn
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="cartItems" class="mb-3">
+                                <div class="text-muted small" id="cartEmpty">Chưa có món nào. Hãy chọn đồ uống ở bên trái.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Ghi chú đơn</label>
+                                <textarea class="form-control" id="orderNote" rows="2" placeholder="Ví dụ: Ít đá, ít ngọt..."></textarea>
+                            </div>
+
+                            <div class="mb-3 row g-2 align-items-center">
+                                <div class="col-6 text-muted small">Tạm tính</div>
+                                <div class="col-6 text-end price" id="subtotal">0đ</div>
+                                <div class="col-6 text-muted small">Ưu đãi khuyến mãi</div>
+                                <div class="col-6 text-end text-danger" id="promoDiscount">-0đ</div>
+                                <div class="col-6 text-muted small">Giảm giá đơn</div>
+                                <div class="col-6 text-end">
+                                    <input type="number" class="form-control form-control-sm text-end" id="orderDiscount" value="0" min="0" step="1000" />
+                                </div>
+                                <div class="col-6 text-muted small">Phí vận chuyển</div>
+                                <div class="col-6 text-end">
+                                    <input type="number" class="form-control form-control-sm text-end" id="shippingFee" value="0" min="0" step="1000" />
+                                </div>
+                                <div class="col-6 fw-bold">Thành tiền</div>
+                                <div class="col-6 text-end fw-bold price" id="grandTotal">0đ</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Phương thức thanh toán</label>
+                                <div class="d-flex flex-wrap gap-2" id="paymentMethod">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="pm" id="pmCash" value="Tiền mặt" checked>
+                                        <label class="form-check-label" for="pmCash">Tiền mặt</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="pm" id="pmCard" value="Thẻ/POS">
+                                        <label class="form-check-label" for="pmCard">Thẻ/POS</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="pm" id="pmQR" value="QR/MOMO">
+                                        <label class="form-check-label" for="pmQR">QR/MOMO</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" id="btnCheckout">
+                                    <i class="fa-solid fa-check me-1"></i> Tạo đơn & Thanh toán
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add-to-cart Modal (server-rendered to allow Thymeleaf in body) -->
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-mug-hot me-2"></i><span id="mTitle">Chọn món</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <div class="mb-2"><strong>Kích cỡ</strong></div>
+                            <div id="mSizes" class="vstack gap-2"></div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="mb-2 d-flex align-items-center justify-content-between">
+                                <strong>Topping</strong>
+                                <small class="text-muted">(tuỳ chọn)</small>
+                            </div>
+                            <div id="mToppings" class="vstack gap-2" style="max-height:260px; overflow:auto;">
+                                <div class="form-check d-flex align-items-center" th:each="t : ${toppings}">
+                                    <input class="form-check-input me-2" type="checkbox" th:id="${'t_'+t.maTopping}" th:data-ma-topping="${t.maTopping}" th:data-ten-topping="${t.tenTopping}" th:data-don-gia="${t.giaThem}" />
+                                    <label class="form-check-label d-flex w-100 justify-content-between" th:for="${'t_'+t.maTopping}">
+                                        <span th:text="${t.tenTopping}">Topping</span>
+                                        <span class="text-muted" th:text="${#numbers.formatDecimal(t.giaThem,0,'COMMA',0,'POINT')} + 'đ'">0đ</span>
+                                    </label>
+                                    <div class="ms-2 d-none qty-ctrl">
+                                        <button class="btn btn-outline-secondary btn-sm btn-qty btn-tp-minus" type="button"><i class="fa-solid fa-minus"></i></button>
+                                        <input type="number" class="form-control form-control-sm mx-1 tp-qty" value="1" min="1" style="width:58px;" />
+                                        <button class="btn btn-outline-secondary btn-sm btn-qty btn-tp-plus" type="button"><i class="fa-solid fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 row g-2 align-items-center">
+                        <div class="col-auto">Số lượng:</div>
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <button class="btn btn-outline-secondary" id="mQtyMinus" type="button"><i class="fa-solid fa-minus"></i></button>
+                                <input type="number" class="form-control text-center" id="mQty" value="1" min="1" style="width:70px;" />
+                                <button class="btn btn-outline-secondary" id="mQtyPlus" type="button"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="col text-end"><strong>Tạm tính: <span id="mLineTotal">0đ</span></strong></div>
+                    </div>
+                    <div class="mt-2">
+                        <label class="form-label small text-muted">Ghi chú</label>
+                        <input type="text" id="mNote" class="form-control" placeholder="Ví dụ: ít đá, ít đường..." />
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <div class="text-muted small"><span id="mBaseInfo"></span></div>
+                    <button type="button" class="btn btn-primary" id="mAddBtn"><i class="fa-solid fa-cart-plus me-1"></i>Thêm vào đơn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        // Inject promo percent map from server: { maSP: percent }
+        window.productDiscountPercents = /*[[${discountPercents}]]*/ {};
+    </script>
+    <script>
+        // Utilities
+        const fmt = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + 'đ';
+        const promoPercents = (typeof window !== 'undefined' && window.productDiscountPercents) ? window.productDiscountPercents : {};
+
+        // State
+        const cart = {
+            items: [], // {key, maSP, tenSP, maBT, tenSize, unitPrice, soLuong, ghiChu, toppings:[{maTopping, tenTopping, donGia, soLuong}]}
+            discount: 0,
+            shipping: 0,
+            note: '',
+            payment: 'Tiền mặt'
+        };
+
+        const elCartItems = document.getElementById('cartItems');
+        const elCartEmpty = document.getElementById('cartEmpty');
+    const elSubtotal = document.getElementById('subtotal');
+    const elPromo = document.getElementById('promoDiscount');
+    const elGrand = document.getElementById('grandTotal');
+        const elDiscount = document.getElementById('orderDiscount');
+        const elShipping = document.getElementById('shippingFee');
+        const elNote = document.getElementById('orderNote');
+
+                const addModal = document.getElementById('addModal');
+                const bsAddModal = new bootstrap.Modal(addModal);
+
+        let currentProduct = null; // {maSP, tenSP, variants:[{maBT, tenSize, giaBan}], qty, toppings:[...], note}
+
+        // Product select button
+        document.querySelectorAll('.btn-add').forEach(btn => {
+            btn.addEventListener('click', e => {
+                const card = e.target.closest('.card');
+                const maSP = btn.getAttribute('data-masp');
+                const tenSP = btn.getAttribute('data-tensp');
+                const variants = [...card.querySelectorAll('.variants')]
+                    .map(v => ({
+                        maBT: parseInt(v.dataset.maBt),
+                        tenSize: v.dataset.tenSize,
+                        giaBan: parseFloat(v.dataset.giaBan || '0'),
+                        active: (v.dataset.trangThai === '1')
+                    }))
+                    .filter(v => v.active);
+
+                currentProduct = { maSP: parseInt(maSP), tenSP, variants, qty: 1, toppings: [], note: '' };
+                setupModal();
+            });
+        });
+
+        function setupModal(){
+            // Title
+            document.getElementById('mTitle').textContent = currentProduct.tenSP;
+            // Sizes
+            const mSizes = document.getElementById('mSizes');
+            mSizes.innerHTML = '';
+            currentProduct.variants.forEach((v, idx) => {
+                const id = `size_${currentProduct.maSP}_${v.maBT}`;
+                const div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = `
+                  <input class="form-check-input" type="radio" name="mSize" id="${id}" value="${v.maBT}" ${idx===0?'checked':''} data-price="${v.giaBan}">
+                  <label class="form-check-label" for="${id}">${v.tenSize} - ${fmt(v.giaBan)}</label>`;
+                mSizes.appendChild(div);
+            });
+            // Toppings controls
+            document.querySelectorAll('#mToppings .form-check-input').forEach(chk => {
+                chk.checked = false;
+                const qtyBox = chk.closest('.form-check').querySelector('.qty-ctrl');
+                qtyBox.classList.add('d-none');
+                qtyBox.querySelector('.tp-qty').value = 1;
+            });
+            // Qty and note
+            document.getElementById('mQty').value = 1;
+            document.getElementById('mNote').value = '';
+            updateModalLineTotal();
+
+            // Wire events
+            mSizes.querySelectorAll('input[name="mSize"]').forEach(r => r.addEventListener('change', updateModalLineTotal));
+            document.getElementById('mQtyMinus').onclick = () => { const q = document.getElementById('mQty'); q.value = Math.max(1, parseInt(q.value||'1')-1); updateModalLineTotal(); };
+            document.getElementById('mQtyPlus').onclick = () => { const q = document.getElementById('mQty'); q.value = parseInt(q.value||'1')+1; updateModalLineTotal(); };
+            document.getElementById('mQty').oninput = updateModalLineTotal;
+
+            document.querySelectorAll('#mToppings .form-check-input').forEach(chk => {
+                chk.onchange = () => {
+                    const ctrl = chk.closest('.form-check').querySelector('.qty-ctrl');
+                    if (chk.checked) ctrl.classList.remove('d-none'); else ctrl.classList.add('d-none');
+                    updateModalLineTotal();
+                };
+            });
+            document.querySelectorAll('#mToppings .btn-tp-minus').forEach(btn => btn.onclick = () => { const input = btn.parentElement.querySelector('.tp-qty'); input.value = Math.max(1, parseInt(input.value||'1')-1); updateModalLineTotal(); });
+            document.querySelectorAll('#mToppings .btn-tp-plus').forEach(btn => btn.onclick = () => { const input = btn.parentElement.querySelector('.tp-qty'); input.value = parseInt(input.value||'1')+1; updateModalLineTotal(); });
+            document.querySelectorAll('#mToppings .tp-qty').forEach(inp => inp.oninput = updateModalLineTotal);
+
+            document.getElementById('mAddBtn').onclick = addCurrentToCart;
+        }
+
+        function updateModalLineTotal(){
+            const size = document.querySelector('input[name="mSize"]:checked');
+            const base = size ? parseFloat(size.dataset.price||'0') : 0;
+            let toppingsSum = 0;
+            document.querySelectorAll('#mToppings .form-check-input:checked').forEach(chk => {
+                const price = parseFloat(chk.dataset.donGia||'0');
+                const qty = parseInt(chk.closest('.form-check').querySelector('.tp-qty').value||'1');
+                toppingsSum += price * qty;
+            });
+            const qty = parseInt(document.getElementById('mQty').value||'1');
+            const lineTotal = (base + toppingsSum) * qty;
+            document.getElementById('mLineTotal').textContent = fmt(lineTotal);
+            document.getElementById('mBaseInfo').textContent = `Giá nền: ${fmt(base)} + topping: ${fmt(toppingsSum)} x ${qty}`;
+        }
+
+        function addCurrentToCart(){
+            const sizeEl = document.querySelector('input[name="mSize"]:checked');
+            if (!sizeEl) return;
+            const maBT = parseInt(sizeEl.value);
+            const tenSize = sizeEl.nextElementSibling.textContent.split('-')[0].trim();
+            const unitPrice = parseFloat(sizeEl.dataset.price||'0');
+            const qty = parseInt(document.getElementById('mQty').value||'1');
+            const note = document.getElementById('mNote').value||'';
+            const toppings = [];
+            document.querySelectorAll('#mToppings .form-check-input:checked').forEach(chk => {
+                toppings.push({
+                    maTopping: parseInt(chk.dataset.maTopping),
+                    tenTopping: chk.dataset.tenTopping,
+                    donGia: parseFloat(chk.dataset.donGia||'0'),
+                    soLuong: parseInt(chk.closest('.form-check').querySelector('.tp-qty').value||'1')
+                });
+            });
+            const key = `${currentProduct.maSP}_${maBT}_${Date.now()}`;
+            cart.items.push({ key, maSP: currentProduct.maSP, tenSP: currentProduct.tenSP, maBT, tenSize, unitPrice, soLuong: qty, ghiChu: note, toppings });
+            bsAddModal.hide();
+            renderCart();
+        }
+
+        // Cart rendering and operations
+        function getPromoPercent(maSP){
+            try { return Math.max(0, Math.min(100, parseInt(promoPercents[maSP]||0))); } catch { return 0; }
+        }
+        function calcItemBreakdown(it){
+            const toppingsSumPerUnit = it.toppings.reduce((s,t)=> s + (t.donGia * t.soLuong), 0);
+            const lineSubtotal = (it.unitPrice + toppingsSumPerUnit) * it.soLuong;
+            const percent = getPromoPercent(it.maSP);
+            const promoDiscount = Math.round((it.unitPrice * percent / 100) * it.soLuong);
+            const lineTotalAfterPromo = Math.max(0, lineSubtotal - promoDiscount);
+            return { lineSubtotal, promoDiscount, percent, lineTotalAfterPromo };
+        }
+        function calcSubtotal(){ return cart.items.reduce((s,it)=> s + calcItemBreakdown(it).lineSubtotal, 0); }
+        function calcPromoTotal(){ return cart.items.reduce((s,it)=> s + calcItemBreakdown(it).promoDiscount, 0); }
+
+        function renderCart(){
+            elCartItems.innerHTML = '';
+            if (cart.items.length === 0){
+                elCartItems.appendChild(elCartEmpty);
+                elCartEmpty.classList.remove('d-none');
+            } else {
+                elCartEmpty.classList.add('d-none');
+                                cart.items.forEach(it => {
+                                        const br = calcItemBreakdown(it);
+                    const div = document.createElement('div');
+                    div.className = 'cart-item';
+                    div.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                          <div>
+                            <div class="fw-semibold">${it.tenSP} <small class="text-muted">(${it.tenSize})</small></div>
+                            <div class="small text-muted">
+                              <span class="me-2">SL: </span>
+                              <button class="btn btn-sm btn-outline-secondary btn-qty btn-minus" data-key="${it.key}"><i class="fa-solid fa-minus"></i></button>
+                              <span class="mx-2">${it.soLuong}</span>
+                              <button class="btn btn-sm btn-outline-secondary btn-qty btn-plus" data-key="${it.key}"><i class="fa-solid fa-plus"></i></button>
+                              <button class="btn btn-sm btn-outline-danger ms-2 btn-remove" data-key="${it.key}"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="mt-1">
+                              ${it.toppings.map(t => `<span class='badge rounded-pill topping-badge'>${t.tenTopping} x${t.soLuong}</span>`).join(' ')}
+                            </div>
+                            ${it.ghiChu ? `<div class='small text-muted fst-italic mt-1'>${it.ghiChu}</div>` : ''}
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <div class="price">${fmt(br.lineTotalAfterPromo)}</div>
+                                                        ${br.percent>0 ? `<div class='promo-line'>Giảm ${br.percent}%: -${fmt(br.promoDiscount)}</div>` : ''}
+                                                        <div class="small text-muted">Giá nền: ${fmt(it.unitPrice)}</div>
+                                                    </div>
+                        </div>`;
+                    elCartItems.appendChild(div);
+                });
+            }
+
+            // Update totals
+            cart.discount = parseFloat(elDiscount.value||'0');
+            cart.shipping = parseFloat(elShipping.value||'0');
+            cart.note = elNote.value||'';
+                        const subtotal = calcSubtotal();
+                        const promoTotal = calcPromoTotal();
+                        elSubtotal.textContent = fmt(subtotal);
+                        elPromo.textContent = '-' + fmt(promoTotal);
+                        elGrand.textContent = fmt(subtotal - promoTotal - cart.discount + cart.shipping);
+
+                        // Toggle border highlight if there is any promo
+                        const cartCard = document.querySelector('.cart-card');
+                        if (cartCard){
+                                if (promoTotal > 0) cartCard.classList.add('has-discount');
+                                else cartCard.classList.remove('has-discount');
+                        }
+
+            // Bind buttons
+            elCartItems.querySelectorAll('.btn-minus').forEach(b=> b.onclick = () => { const it = cart.items.find(i=>i.key===b.dataset.key); if(!it) return; it.soLuong = Math.max(1, it.soLuong-1); renderCart(); });
+            elCartItems.querySelectorAll('.btn-plus').forEach(b=> b.onclick = () => { const it = cart.items.find(i=>i.key===b.dataset.key); if(!it) return; it.soLuong += 1; renderCart(); });
+            elCartItems.querySelectorAll('.btn-remove').forEach(b=> b.onclick = () => { cart.items = cart.items.filter(i=>i.key!==b.dataset.key); renderCart(); });
+        }
+
+        // Inputs listeners
+        elDiscount.addEventListener('input', renderCart);
+        elShipping.addEventListener('input', renderCart);
+        elNote.addEventListener('input', renderCart);
+        document.getElementById('btnClearCart').addEventListener('click', ()=>{ cart.items = []; renderCart(); });
+        document.querySelectorAll('#paymentMethod input[name="pm"]').forEach(r=> r.addEventListener('change', ()=>{ cart.payment = r.value; }));
+
+        document.getElementById('btnCheckout').addEventListener('click', async ()=>{
+            if (cart.items.length === 0) { alert('Vui lòng chọn ít nhất 1 món.'); return; }
+            const req = buildApiRequest();
+            try {
+                const res = await fetch('/NhanVien/donhang/tao', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(req)
+                });
+                if (!res.ok) {
+                    const txt = await res.text();
+                    throw new Error(txt || 'Lỗi tạo đơn');
+                }
+                const data = await res.json();
+                alert(`Tạo đơn thành công! Mã đơn: ${data.maDH}\nThành tiền: ${new Intl.NumberFormat('vi-VN').format(Math.round(data.tongThanhToan))}đ`);
+                // Clear cart after success
+                cart.items = []; elDiscount.value = '0'; elShipping.value = '0'; elNote.value = ''; renderCart();
+            } catch (e) {
+                alert('Không thể tạo đơn: ' + e.message);
+            }
+        });
+
+        function buildApiRequest(){
+            return {
+                paymentMethod: cart.payment,
+                payNow: true,
+                giamGiaDon: cart.discount,
+                phiVanChuyen: cart.shipping,
+                ghiChu: cart.note,
+                phuongThucNhanHang: 'TAI_QUAY',
+                items: cart.items.map(it => ({
+                    maBT: it.maBT,
+                    soLuong: it.soLuong,
+                    giamGiaDong: 0,
+                    ghiChu: it.ghiChu,
+                    toppings: it.toppings.map(t => ({ maTopping: t.maTopping, soLuong: t.soLuong }))
+                }))
+            };
+        }
+
+        // initial
+        renderCart();
+    </script>
+</body>
+</html>

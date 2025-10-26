@@ -4,7 +4,6 @@ import com.alotra.web.entity.NhanVien;
 import com.alotra.web.repository.NhanVienRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,6 @@ import java.util.Optional;
 public class NhanVienService {
     
     private final NhanVienRepository nhanVienRepository;
-    private final PasswordEncoder passwordEncoder;
     
     /**
      * Xác thực thông tin đăng nhập của nhân viên

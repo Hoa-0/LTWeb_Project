@@ -1,34 +1,21 @@
 package com.alotra.web.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
-import java.util.Objects;
 
 @Embeddable
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CTDonHangToppingId implements Serializable {
-    private Integer ctId;
-    private Integer toppingId;
+    @Column(name = "MaCT")
+    private Integer maCT;
 
-    public CTDonHangToppingId() {}
-    public CTDonHangToppingId(Integer ctId, Integer toppingId) {
-        this.ctId = ctId;
-        this.toppingId = toppingId;
-    }
-
-    public Integer getCtId() { return ctId; }
-    public void setCtId(Integer ctId) { this.ctId = ctId; }
-    public Integer getToppingId() { return toppingId; }
-    public void setToppingId(Integer toppingId) { this.toppingId = toppingId; }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CTDonHangToppingId that)) return false;
-        return Objects.equals(ctId, that.ctId) && Objects.equals(toppingId, that.toppingId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(ctId, toppingId);
-    }
+    @Column(name = "MaTopping")
+    private Integer maTopping;
 }

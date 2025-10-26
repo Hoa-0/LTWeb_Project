@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>In đơn hàng</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .header { text-align: center; margin-bottom: 16px; }
+        .items table { width: 100%; border-collapse: collapse; }
+        .items th, .items td { border: 1px solid #ddd; padding: 6px; font-size: 12px; }
+        .totals { margin-top: 8px; text-align: right; }
+        .small { font-size: 11px; color: #555; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+<div class="no-print" style="margin-bottom:8px; text-align:right">
+    <button onclick="window.print()">In</button>
+</div>
+<div class="header">
+    <h3>Hóa đơn #<span th:text="${order.maDH}">0</span></h3>
+    <div class="small" th:text="${#temporals.format(order.ngayLap, 'dd/MM/yyyy HH:mm')}">-</div>
+</div>
+<div>
+    KH: <span th:text="${order.tenNguoiNhan != null ? order.tenNguoiNhan : ('KH' + order.maKH)}">-</span><br/>
+    ĐT: <span th:text="${order.sdtNguoiNhan}">-</span><br/>
+    Địa chỉ: <span th:text="${order.diaChiNhanHang}">-</span>
+</div>
+<div class="items" style="margin-top:10px;">
+    <table>
+        <thead>
+            <tr>
+                <th>Tên</th>
+                <th>SL</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="ct : ${lines}">
+                <td>
+                    BT #<span th:text="${ct.maBT}">-</span>
+                    <div class="small" th:if="${toppingsByLine[ct.maCT] != null && !#lists.isEmpty(toppingsByLine[ct.maCT])}">
+                        <span th:each="tp,iter : ${toppingsByLine[ct.maCT]}" th:text="${'T' + tp.id.maTopping + ' x' + tp.soLuong + (iter.last ? '' : ', ')}">Top</span>
+                    </div>
+                </td>
+                <td th:text="${ct.soLuong}">0</td>
+                <td th:text="${#numbers.formatDecimal(ct.donGia, 0, 'POINT', 0, 'COMMA')}">0</td>
+                <td th:text="${#numbers.formatDecimal(ct.thanhTien, 0, 'POINT', 0, 'COMMA')}">0</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="totals">
+    Tổng hàng: <strong th:text="${#numbers.formatDecimal(order.tongHang, 0, 'POINT', 0, 'COMMA')}">0</strong><br/>
+    Phí VC: <strong th:text="${#numbers.formatDecimal(order.phiVanChuyen, 0, 'POINT', 0, 'COMMA')}">0</strong><br/>
+    Giảm đơn: <strong th:text="${#numbers.formatDecimal(order.giamGiaDon, 0, 'POINT', 0, 'COMMA')}">0</strong><br/>
+    Tổng TT: <strong th:text="${#numbers.formatDecimal(order.tongThanhToan, 0, 'POINT', 0, 'COMMA')}">0</strong>
+</div>
+</body>
+</html>

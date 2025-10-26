@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="nhanvien/layout :: layout(~{::content})">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{nhanvien/layout}">
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết sản phẩm</title>
 </head>
 <body>
-    <div th:fragment="content">
+    <div layout:fragment="content">
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}">Thành công</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">Có lỗi xảy ra</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <!-- Page Header -->
         <div class="page-header d-flex justify-content-between align-items-center">
             <div>
@@ -63,7 +72,7 @@
                                     <tr>
                                         <td class="fw-semibold" width="150">Mã sản phẩm:</td>
                                         <td>
-                                            <span class="badge bg-primary" th:text="'SP' + ${#strings.padLeft(sanPham.maSP.toString(), 3, '0')}">SP001</span>
+                                            <span class="badge bg-primary" th:text="${#strings.format('SP%03d', sanPham.maSP)}">SP001</span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -104,7 +113,7 @@
                 </div>
 
                 <!-- Product Variants -->
-                <div class="card" th:if="${sanPhamDTO.bienThes != null and !sanPhamDTO.bienThes.isEmpty()}">
+                <div class="card" th:if="${sanPhamDTO != null and sanPhamDTO.bienThes != null and !sanPhamDTO.bienThes.isEmpty()}">
                     <div class="card-header">
                         <h5 class="card-title">Biến thể sản phẩm</h5>
                     </div>
@@ -121,10 +130,12 @@
                                 <tbody>
                                     <tr th:each="bt : ${sanPhamDTO.bienThes}">
                                         <td>
-                                            <span class="badge bg-outline-primary" th:text="${bt.tenSize}">Size M</span>
+                                            <span class="badge bg-primary-subtle text-primary" th:text="${bt.tenSize} ?: 'N/A'">Size M</span>
                                         </td>
                                         <td>
-                                            <strong class="text-success" th:text="${#numbers.formatDecimal(bt.giaBan, 0, 'COMMA', 0, 'POINT')} + '₫'">50,000₫</strong>
+                                            <strong class="text-success" th:if="${bt.giaBan != null}"
+                                                    th:text="${#numbers.formatDecimal(bt.giaBan, 0, 'COMMA', 0, 'POINT')} + '₫'">50,000₫</strong>
+                                            <span class="text-muted" th:unless="${bt.giaBan != null}">—</span>
                                         </td>
                                         <td>
                                             <span th:if="${bt.trangThai == 1}" class="badge bg-success">
@@ -142,7 +153,7 @@
                 </div>
 
                 <!-- No Variants Message -->
-                <div class="card" th:if="${sanPhamDTO.bienThes == null or sanPhamDTO.bienThes.isEmpty()}">
+                <div class="card" th:if="${sanPhamDTO == null or sanPhamDTO.bienThes == null or sanPhamDTO.bienThes.isEmpty()}">
                     <div class="card-body text-center py-5">
                         <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">Chưa có biến thể nào</h5>
