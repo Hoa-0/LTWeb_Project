@@ -1,34 +1,49 @@
 package com.alotra.web.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import java.time.LocalDateTime;
 
-@Data
 @Entity
-@Table(name = "products")
+@Table(name = "SanPham")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "MaSP")
+    private Integer id;
 
-    @Column(nullable = false, length = 255)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaDM", nullable = false)
+    private Category category; // This should map to DanhMucSanPham entity
+
+    @Column(name = "TenSP", nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "MoTa")
     private String description;
 
-    private double price;
+    @Column(name = "TrangThai", nullable = false)
+    private Integer status;
 
-    private String imageUrl; // Sẽ chứa URL từ Cloudinary
+    @Column(name = "UrlAnh")
+    private String imageUrl;
 
-    private boolean isActive = true; // Mặc định là đang bán
+    // Soft delete timestamp (null = active)
+    @Column(name = "DeletedAt")
+    private LocalDateTime deletedAt;
 
-    // Nhiều sản phẩm thuộc về một danh mục
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
-    
-    @ManyToOne
-    @JoinColumn(name = "vendor_id")
-    private User vendor;
+    // Getters and Setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public Integer getStatus() { return status; }
+    public void setStatus(Integer status) { this.status = status; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }
