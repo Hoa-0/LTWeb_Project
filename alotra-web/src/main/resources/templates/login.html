@@ -11,18 +11,17 @@
         <div class="col-md-6 col-lg-5">
             <h2 class="text-center mt-5 mb-4">Đăng Nhập AloTra</h2>
 
+            <!-- Thông báo lỗi -->
             <div th:if="${param.error}" class="alert alert-danger">
                 Sai email hoặc mật khẩu.
             </div>
 
+            <!-- Thông báo khi logout -->
             <div th:if="${param.logout}" class="alert alert-success">
                 Bạn đã đăng xuất thành công.
             </div>
 
             <form th:action="@{/login}" method="post">
-                <!-- CSRF token bắt buộc cho POST -->
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
                 <div class="mb-3">
                     <label for="username" class="form-label">Email</label>
                     <input type="email" class="form-control" id="username" name="username"
@@ -34,6 +33,7 @@
                            placeholder="Nhập mật khẩu" required>
                 </div>
 
+                <!-- Tùy chọn remember-me -->
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
                     <label class="form-check-label" for="remember-me">Ghi nhớ đăng nhập</label>

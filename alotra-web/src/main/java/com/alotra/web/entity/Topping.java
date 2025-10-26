@@ -1,25 +1,22 @@
 package com.alotra.web.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "SanPham")
-public class Product {
+@Table(name = "Topping")
+public class Topping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MaSP")
+    @Column(name = "MaTopping")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MaDM", nullable = false)
-    private Category category; // This should map to DanhMucSanPham entity
-
-    @Column(name = "TenSP", nullable = false)
+    @Column(name = "TenTopping", nullable = false, unique = true)
     private String name;
 
-    @Column(name = "MoTa")
-    private String description;
+    @Column(name = "GiaThem", nullable = false)
+    private BigDecimal extraPrice;
 
     @Column(name = "TrangThai", nullable = false)
     private Integer status;
@@ -34,12 +31,10 @@ public class Product {
     // Getters and Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-    public Category getCategory() { return category; }
-    public void setCategory(Category category) { this.category = category; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public BigDecimal getExtraPrice() { return extraPrice; }
+    public void setExtraPrice(BigDecimal extraPrice) { this.extraPrice = extraPrice; }
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }
     public String getImageUrl() { return imageUrl; }

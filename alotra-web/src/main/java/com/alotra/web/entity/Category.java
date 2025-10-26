@@ -1,21 +1,33 @@
 package com.alotra.web.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import java.util.Set;
+import java.time.LocalDateTime;
 
-@Data
 @Entity
-@Table(name = "categories")
+@Table(name = "DanhMucSanPham")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "MaDM")
     private Integer id;
 
-    @Column(nullable = false, length = 100, unique = true)
+    @Column(name = "TenDM", nullable = false, unique = true)
     private String name;
 
-    // Một danh mục có nhiều sản phẩm
-    @OneToMany(mappedBy = "category")
-    private Set<Product> products;
+    @Column(name = "MoTa")
+    private String description;
+
+    // Soft delete timestamp (null = active)
+    @Column(name = "DeletedAt")
+    private LocalDateTime deletedAt;
+
+    // Getters and Setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 }
