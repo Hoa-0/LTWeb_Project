@@ -107,7 +107,7 @@
                                 <thead>
                                     <tr>
                                         <th>Mã đơn</th>
-                                        <th>Khách hàng</th>
+                                        <th>Người nhận</th>
                                         <th>Tổng tiền</th>
                                         <th>Trạng thái</th>
                                         <th>Ngày đặt</th>
@@ -179,169 +179,124 @@
         <!-- Dashboard specific scripts -->
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Load dashboard data
-            loadDashboardData();
-            
-            // Initialize charts
-            initRevenueChart();
-            initOrderStatusChart();
+            loadSummary();
+            loadRecentOrders();
+            loadTopProducts();
+            loadRevenueChart();
+            loadOrderStatusChart();
         });
 
-        function loadDashboardData() {
-            // Load stats (placeholder data)
-            document.getElementById('totalProducts').textContent = '24';
-            document.getElementById('totalOrders').textContent = '8';
-            document.getElementById('pendingOrders').textContent = '3';
-            document.getElementById('monthlyRevenue').textContent = '15,750,000₫';
-            
-            // Load recent orders (placeholder)
-            loadRecentOrders();
-            
-            // Load top products (placeholder)
-            loadTopProducts();
+        function fmtVND(value) {
+            try {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
+            } catch (e) { return (value || 0) + '₫'; }
         }
 
-        function loadRecentOrders() {
+        async function loadSummary() {
+            try {
+                const res = await fetch('/NhanVien/dashboard/api/summary');
+                if (!res.ok) return;
+                const data = await res.json();
+                document.getElementById('totalProducts').textContent = data.totalProducts ?? 0;
+                document.getElementById('totalOrders').textContent = data.todayOrders ?? 0;
+                document.getElementById('pendingOrders').textContent = data.pendingOrders ?? 0;
+                document.getElementById('monthlyRevenue').textContent = fmtVND(data.monthlyRevenue ?? 0);
+            } catch (_) {}
+        }
+
+        async function loadRecentOrders() {
             const tableBody = document.getElementById('recentOrdersTable');
-            const sampleOrders = [
-                { id: 'DH001', customer: 'Nguyễn Văn A', total: '250,000₫', status: 'Đã xác nhận', date: '25/10/2025' },
-                { id: 'DH002', customer: 'Trần Thị B', total: '180,000₫', status: 'Chờ xử lý', date: '25/10/2025' },
-                { id: 'DH003', customer: 'Lê Văn C', total: '320,000₫', status: 'Đang giao', date: '24/10/2025' },
-                { id: 'DH004', customer: 'Phạm Thị D', total: '150,000₫', status: 'Hoàn thành', date: '24/10/2025' },
-                { id: 'DH005', customer: 'Hoàng Văn E', total: '280,000₫', status: 'Chờ xử lý', date: '23/10/2025' }
-            ];
-            
-            tableBody.innerHTML = '';
-            sampleOrders.forEach(order => {
-                let statusBadge = '';
-                switch(order.status) {
-                    case 'Đã xác nhận':
-                        statusBadge = '<span class="badge bg-primary">Đã xác nhận</span>';
-                        break;
-                    case 'Chờ xử lý':
-                        statusBadge = '<span class="badge bg-warning">Chờ xử lý</span>';
-                        break;
-                    case 'Đang giao':
-                        statusBadge = '<span class="badge bg-info">Đang giao</span>';
-                        break;
-                    case 'Hoàn thành':
-                        statusBadge = '<span class="badge bg-success">Hoàn thành</span>';
-                        break;
+            try {
+                const res = await fetch('/NhanVien/dashboard/api/recent-orders?limit=5');
+                if (!res.ok) return;
+                const orders = await res.json();
+                tableBody.innerHTML = '';
+                if (!orders.length) {
+                    tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Chưa có đơn hàng</td></tr>';
+                    return;
                 }
-                
-                tableBody.innerHTML += `
-                    <tr>
-                        <td><strong>${order.id}</strong></td>
-                        <td>${order.customer}</td>
-                        <td><strong>${order.total}</strong></td>
-                        <td>${statusBadge}</td>
-                        <td>${order.date}</td>
-                    </tr>
-                `;
-            });
+                orders.forEach(o => {
+                    const total = fmtVND(o.tongThanhToan);
+                    const date = new Date(o.ngayLap).toLocaleString('vi-VN');
+                    const statusBadge = `<span class="badge bg-secondary">${o.trangThai || ''}</span>`;
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td><strong>#${o.maDH}</strong></td>
+                            <td>${o.tenNguoiNhan || ''}</td>
+                            <td><strong>${total}</strong></td>
+                            <td>${statusBadge}</td>
+                            <td>${date}</td>
+                        </tr>
+                    `;
+                });
+            } catch (_) {}
         }
 
-        function loadTopProducts() {
+        async function loadTopProducts() {
             const container = document.getElementById('topProductsList');
-            const sampleProducts = [
-                { name: 'Trà sữa truyền thống', sales: 45, revenue: '2,250,000₫' },
-                { name: 'Trà đào cam sả', sales: 38, revenue: '1,900,000₫' },
-                { name: 'Trà sữa chocolate', sales: 32, revenue: '1,600,000₫' },
-                { name: 'Trà xanh matcha', sales: 28, revenue: '1,400,000₫' },
-                { name: 'Trà oolong milk tea', sales: 25, revenue: '1,250,000₫' }
-            ];
-            
-            let html = '';
-            sampleProducts.forEach((product, index) => {
-                html += `
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="badge bg-primary rounded-pill">${index + 1}</span>
+            try {
+                const res = await fetch('/NhanVien/dashboard/api/top-products?days=30&limit=5');
+                if (!res.ok) return;
+                const list = await res.json();
+                if (!list.length) {
+                    container.innerHTML = '<div class="text-center py-4 text-muted">Chưa có dữ liệu</div>';
+                    return;
+                }
+                let html = '';
+                list.forEach((p, idx) => {
+                    html += `
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3"><span class="badge bg-primary rounded-pill">${idx + 1}</span></div>
+                                <div>
+                                    <div class="fw-semibold">${p.tenSP}</div>
+                                    <small class="text-muted">${p.sales} ly bán ra</small>
+                                </div>
                             </div>
-                            <div>
-                                <div class="fw-semibold">${product.name}</div>
-                                <small class="text-muted">${product.sales} ly bán ra</small>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-semibold text-success">${product.revenue}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
+                            <div class="text-end"><div class="fw-semibold text-success">${fmtVND(p.revenue)}</div></div>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            } catch (_) {}
         }
 
-        function initRevenueChart() {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['19/10', '20/10', '21/10', '22/10', '23/10', '24/10', '25/10'],
-                    datasets: [{
+        async function loadRevenueChart() {
+            try {
+                const res = await fetch('/NhanVien/dashboard/api/revenue-7-days');
+                if (!res.ok) return;
+                const series = await res.json();
+                const ctx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: { labels: series.labels || [], datasets: [{
                         label: 'Doanh thu (VNĐ)',
-                        data: [1200000, 1500000, 980000, 1800000, 2100000, 1650000, 1950000],
+                        data: series.data || [],
                         borderColor: '#667eea',
                         backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return new Intl.NumberFormat('vi-VN', {
-                                        style: 'currency',
-                                        currency: 'VND'
-                                    }).format(value);
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
+                        borderWidth: 3, fill: true, tension: 0.4
+                    }]},
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, ticks: { callback: (v) => fmtVND(v) } } },
+                        plugins: { legend: { display: false } }
                     }
-                }
-            });
+                });
+            } catch (_) {}
         }
 
-        function initOrderStatusChart() {
-            const ctx = document.getElementById('orderStatusChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Hoàn thành', 'Đang giao', 'Đã xác nhận', 'Chờ xử lý'],
-                    datasets: [{
-                        data: [45, 20, 15, 20],
-                        backgroundColor: [
-                            '#28a745',
-                            '#17a2b8',
-                            '#007bff',
-                            '#ffc107'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
+        async function loadOrderStatusChart() {
+            try {
+                const res = await fetch('/NhanVien/dashboard/api/order-statuses?days=7');
+                if (!res.ok) return;
+                const series = await res.json();
+                const colors = ['#28a745','#17a2b8','#007bff','#ffc107','#6f42c1','#20c997','#fd7e14','#dc3545'];
+                const ctx = document.getElementById('orderStatusChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels: series.labels || [], datasets: [{ data: series.data || [], backgroundColor: colors, borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                });
+            } catch (_) {}
         }
         </script>
     </div>

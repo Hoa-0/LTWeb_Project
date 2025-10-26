@@ -35,6 +35,10 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     // Tìm sản phẩm theo trạng thái
     @Query("SELECT sp FROM SanPham sp WHERE sp.trangThai = :trangThai AND sp.deletedAt IS NULL")
     Page<SanPham> findByTrangThaiAndNotDeleted(@Param("trangThai") Byte trangThai, Pageable pageable);
+
+    // Sản phẩm đang bán theo danh mục
+    @Query("SELECT sp FROM SanPham sp WHERE sp.maDM = :maDM AND sp.trangThai = 1 AND sp.deletedAt IS NULL")
+    Page<SanPham> findActiveByMaDM(@Param("maDM") Integer maDM, Pageable pageable);
     
     // Tìm kiếm sản phẩm theo tên
     @Query("SELECT sp FROM SanPham sp WHERE LOWER(sp.tenSP) LIKE LOWER(CONCAT('%', :tenSP, '%')) AND sp.deletedAt IS NULL")

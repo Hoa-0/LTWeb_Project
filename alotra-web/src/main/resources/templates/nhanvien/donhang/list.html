@@ -20,31 +20,33 @@
                 <div class="row">
                     <div class="col-md-3">
                         <label class="form-label">Trạng thái đơn hàng</label>
-                        <select class="form-select">
+                        <form method="get" th:action="@{/NhanVien/donhang}">
+                        <select class="form-select" name="trangThai" th:value="${trangThai}">
                             <option value="">Tất cả</option>
-                            <option value="pending">Chờ xử lý</option>
-                            <option value="confirmed">Đã xác nhận</option>
-                            <option value="shipping">Đang giao</option>
-                            <option value="delivered">Đã giao</option>
-                            <option value="cancelled">Đã hủy</option>
+                            <option value="ChoXuLy">Chờ xử lý</option>
+                            <option value="DangXuLy">Đang xử lý</option>
+                            <option value="DangGiao">Đang giao</option>
+                            <option value="DaGiao">Đã giao</option>
+                            <option value="DaHuy">Đã hủy</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Từ ngày</label>
-                        <input type="date" class="form-control">
+                        <input type="date" class="form-control" name="from" th:value="${from}">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Đến ngày</label>
-                        <input type="date" class="form-control">
+                        <input type="date" class="form-control" name="to" th:value="${to}">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">&nbsp;</label>
                         <div>
-                            <button class="btn btn-primary">
+                            <button class="btn btn-primary" type="submit">
                                 <i class="fas fa-search me-1"></i>Tìm kiếm
                             </button>
                         </div>
                     </div>
+                        </form>
                 </div>
             </div>
         </div>
@@ -57,7 +59,7 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h6 class="card-title">Tổng đơn hàng</h6>
-                                <h3 class="mb-0">156</h3>
+                                <h3 class="mb-0" th:text="${statsTotal}">0</h3>
                             </div>
                             <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
                         </div>
@@ -70,7 +72,7 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h6 class="card-title">Đã giao</h6>
-                                <h3 class="mb-0">98</h3>
+                                <h3 class="mb-0" th:text="${statsDelivered}">0</h3>
                             </div>
                             <i class="fas fa-check-circle fa-2x opacity-75"></i>
                         </div>
@@ -83,7 +85,7 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h6 class="card-title">Đang xử lý</h6>
-                                <h3 class="mb-0">23</h3>
+                                <h3 class="mb-0" th:text="${statsProcessing}">0</h3>
                             </div>
                             <i class="fas fa-clock fa-2x opacity-75"></i>
                         </div>
@@ -96,7 +98,7 @@
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h6 class="card-title">Đã hủy</h6>
-                                <h3 class="mb-0">12</h3>
+                                <h3 class="mb-0" th:text="${statsCancelled}">0</h3>
                             </div>
                             <i class="fas fa-times-circle fa-2x opacity-75"></i>
                         </div>
@@ -124,47 +126,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Sample data - will be replaced with Thymeleaf -->
-                            <tr>
-                                <td>#DH001</td>
-                                <td>Nguyễn Văn A</td>
-                                <td>2024-01-15</td>
-                                <td>250,000đ</td>
-                                <td><span class="badge bg-warning">Chờ xử lý</span></td>
+                            <tr th:each="dh : ${orders.content}">
+                                <td th:text="${'#' + dh.maDH}">#0</td>
+                                <td th:text="${dh.tenNguoiNhan != null ? dh.tenNguoiNhan : ('KH' + dh.maKH)}">Khách</td>
+                                <td th:text="${#temporals.format(dh.ngayLap, 'yyyy-MM-dd HH:mm')}">-</td>
+                                <td th:text="${#numbers.formatDecimal(dh.tongThanhToan, 0, 'POINT', 0, 'COMMA')}">0</td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-success">
-                                        <i class="fas fa-check"></i>
-                                    </button>
+                                    <span th:classappend="${dh.trangThaiDonHang == 'DaGiao' ? 'badge bg-success' : (dh.trangThaiDonHang == 'DangGiao' ? 'badge bg-info' : (dh.trangThaiDonHang == 'DaHuy' ? 'badge bg-danger' : 'badge bg-warning'))}"
+                                          th:text="${dh.trangThaiDonHang}">Trạng thái</span>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td>#DH002</td>
-                                <td>Trần Thị B</td>
-                                <td>2024-01-14</td>
-                                <td>180,000đ</td>
-                                <td><span class="badge bg-success">Đã giao</span></td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-primary">
+                                    <a th:href="@{'/NhanVien/donhang/chi-tiet/' + ${dh.maDH}}" class="btn btn-sm btn-primary">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>#DH003</td>
-                                <td>Lê Văn C</td>
-                                <td>2024-01-13</td>
-                                <td>320,000đ</td>
-                                <td><span class="badge bg-info">Đang giao</span></td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i>
+                                    <a th:href="@{'/NhanVien/donhang/in/' + ${dh.maDH}}" class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-print"></i>
                                     </a>
-                                    <button class="btn btn-sm btn-success">
-                                        <i class="fas fa-check"></i>
-                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -174,14 +151,19 @@
                 <!-- Pagination -->
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Trước</a>
+                        <li class="page-item" th:classappend="${orders.first} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="${orders.first} ? '#' : @{/NhanVien/donhang(page=${orders.number-1}, size=${orders.size}, from=${from}, to=${to}, trangThai=${trangThai}, paymentStatus=${paymentStatus})}"
+                               tabindex="-1">Trước</a>
                         </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Sau</a>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, orders.totalPages-1)}"
+                            th:classappend="${i == orders.number} ? 'active'">
+                            <a class="page-link" th:text="${i+1}"
+                               th:href="@{/NhanVien/donhang(page=${i}, size=${orders.size}, from=${from}, to=${to}, trangThai=${trangThai}, paymentStatus=${paymentStatus})}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${orders.last} ? 'disabled'">
+                            <a class="page-link"
+                               th:href="${orders.last} ? '#' : @{/NhanVien/donhang(page=${orders.number+1}, size=${orders.size}, from=${from}, to=${to}, trangThai=${trangThai}, paymentStatus=${paymentStatus})}">Sau</a>
                         </li>
                     </ul>
                 </nav>

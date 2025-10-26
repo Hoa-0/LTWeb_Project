@@ -2,11 +2,6 @@ package com.alotra.web.repository;
 
 import com.alotra.web.entity.SizeSanPham;
 import org.springframework.data.jpa.repository.JpaRepository;
-<<<<<<< HEAD
-
-public interface SizeSanPhamRepository extends JpaRepository<SizeSanPham, Integer> {
-}
-=======
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -22,4 +17,3 @@ public interface SizeSanPhamRepository extends JpaRepository<SizeSanPham, Intege
     // Tìm size theo tên
     List<SizeSanPham> findByTenSizeIgnoreCase(String tenSize);
 }
->>>>>>> e66511f5f76c02a6c7a92993afb90a3d8655037c

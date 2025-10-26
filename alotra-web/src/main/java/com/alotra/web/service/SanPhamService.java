@@ -12,6 +12,15 @@ public interface SanPhamService {
     
     // CRUD operations
     Page<SanPham> getAllSanPham(Pageable pageable);
+    /**
+     * Lấy danh sách sản phẩm đang bán (trangThai = 1, chưa xóa)
+     */
+    Page<SanPham> getActiveSanPham(Pageable pageable);
+
+    /**
+     * Lấy sản phẩm đang bán theo danh mục
+     */
+    Page<SanPham> getActiveSanPhamByCategory(Integer maDM, Pageable pageable);
     Page<SanPham> getAllSanPhamByCategory(Integer maDM, Pageable pageable);
     Page<SanPham> searchSanPham(String keyword, Integer maDM, Pageable pageable);
     Optional<SanPham> getSanPhamById(Integer maSP);

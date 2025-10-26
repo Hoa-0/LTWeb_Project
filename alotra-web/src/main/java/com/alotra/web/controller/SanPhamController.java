@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/NhanVien/sanpham")
+@RequestMapping({"/NhanVien/san-pham", "/NhanVien/sanpham"})
 @RequiredArgsConstructor
 @Slf4j
 public class SanPhamController {
@@ -82,7 +82,7 @@ public class SanPhamController {
         // Breadcrumb
         model.addAttribute("pageTitle", "Quản lý Sản phẩm");
         
-        return "nhanvien/sanpham/list";
+    return "nhanvien/sanpham/list";
     }
     
     /**
@@ -126,7 +126,7 @@ public class SanPhamController {
             return "redirect:/NhanVien/login";
         }
         
-        // Kiểm tra validation
+        // Kiểm tra validation cơ bản
         if (bindingResult.hasErrors()) {
             List<DanhMucSanPham> danhMucs = danhMucRepository.findAllActive();
             List<SizeSanPham> sizes = sizeRepository.findAllActive();
@@ -138,6 +138,54 @@ public class SanPhamController {
             
             return "nhanvien/sanpham/form";
         }
+
+        // Validate biến thể: cần ít nhất 1 biến thể hợp lệ (có size và giá)
+        List<SanPhamDTO.BienTheDTO> inputVariants = sanPhamDTO.getBienThes();
+        if (inputVariants == null) {
+            inputVariants = List.of();
+        }
+
+        // Lọc biến thể hợp lệ (có maSize và giaBan)
+        List<SanPhamDTO.BienTheDTO> validVariants = new java.util.ArrayList<>();
+        java.util.Set<Integer> sizeSet = new java.util.HashSet<>();
+        for (SanPhamDTO.BienTheDTO bt : inputVariants) {
+            if (bt == null) continue;
+            if (bt.getMaSize() == null || bt.getGiaBan() == null) continue;
+
+            // Kiểm tra size tồn tại và đang active (tránh post id không hợp lệ)
+            Integer maSize = bt.getMaSize();
+            SizeSanPham sz = sizeRepository.findById(maSize).orElse(null);
+            if (sz == null || sz.getTrangThai() == null || sz.getTrangThai() != 1) {
+                continue;
+            }
+
+            // Không cho trùng size trong cùng 1 sản phẩm
+            if (sizeSet.contains(maSize)) {
+                model.addAttribute("variantError", "Mỗi size chỉ được khai báo một lần.");
+                List<DanhMucSanPham> danhMucs = danhMucRepository.findAllActive();
+                List<SizeSanPham> sizes = sizeRepository.findAllActive();
+                model.addAttribute("danhMucs", danhMucs);
+                model.addAttribute("sizes", sizes);
+                model.addAttribute("pageTitle", "Thêm Sản phẩm mới");
+                model.addAttribute("isEdit", false);
+                return "nhanvien/sanpham/form";
+            }
+            sizeSet.add(maSize);
+            validVariants.add(bt);
+        }
+
+        if (validVariants.isEmpty()) {
+            model.addAttribute("variantError", "Vui lòng thêm ít nhất một biến thể hợp lệ (có Size và Giá bán).");
+            List<DanhMucSanPham> danhMucs = danhMucRepository.findAllActive();
+            List<SizeSanPham> sizes = sizeRepository.findAllActive();
+            model.addAttribute("danhMucs", danhMucs);
+            model.addAttribute("sizes", sizes);
+            model.addAttribute("pageTitle", "Thêm Sản phẩm mới");
+            model.addAttribute("isEdit", false);
+            return "nhanvien/sanpham/form";
+        }
+        // Gắn lại danh sách biến thể đã được lọc hợp lệ để lưu
+        sanPhamDTO.setBienThes(validVariants);
         
         try {
             SanPham savedSanPham = sanPhamService.saveSanPham(sanPhamDTO);
@@ -148,7 +196,7 @@ public class SanPhamController {
             redirectAttributes.addFlashAttribute("successMessage", 
                     "Thêm sản phẩm '" + savedSanPham.getTenSP() + "' thành công!");
             
-            return "redirect:/NhanVien/sanpham";
+            return "redirect:/NhanVien/san-pham";
             
         } catch (Exception e) {
             log.error("Error adding product", e);
@@ -184,7 +232,7 @@ public class SanPhamController {
         SanPhamDTO sanPhamDTO = sanPhamService.getSanPhamDTOById(maSP);
         if (sanPhamDTO == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm!");
-            return "redirect:/NhanVien/sanpham";
+            return "redirect:/NhanVien/san-pham";
         }
         
         // Lấy danh sách danh mục và size
@@ -231,6 +279,52 @@ public class SanPhamController {
             
             return "nhanvien/sanpham/form";
         }
+
+        // Validate biến thể: giống như phần thêm
+        List<SanPhamDTO.BienTheDTO> inputVariants = sanPhamDTO.getBienThes();
+        if (inputVariants == null) {
+            inputVariants = List.of();
+        }
+
+        List<SanPhamDTO.BienTheDTO> validVariants = new java.util.ArrayList<>();
+        java.util.Set<Integer> sizeSet = new java.util.HashSet<>();
+        for (SanPhamDTO.BienTheDTO bt : inputVariants) {
+            if (bt == null) continue;
+            if (bt.getMaSize() == null || bt.getGiaBan() == null) continue;
+
+            // Kiểm tra size tồn tại và đang active
+            Integer maSize = bt.getMaSize();
+            SizeSanPham sz = sizeRepository.findById(maSize).orElse(null);
+            if (sz == null || sz.getTrangThai() == null || sz.getTrangThai() != 1) {
+                continue;
+            }
+
+            // Không cho trùng size
+            if (sizeSet.contains(maSize)) {
+                model.addAttribute("variantError", "Mỗi size chỉ được khai báo một lần.");
+                List<DanhMucSanPham> danhMucs = danhMucRepository.findAllActive();
+                List<SizeSanPham> sizes = sizeRepository.findAllActive();
+                model.addAttribute("danhMucs", danhMucs);
+                model.addAttribute("sizes", sizes);
+                model.addAttribute("pageTitle", "Sửa Sản phẩm: " + sanPhamDTO.getTenSP());
+                model.addAttribute("isEdit", true);
+                return "nhanvien/sanpham/form";
+            }
+            sizeSet.add(maSize);
+            validVariants.add(bt);
+        }
+
+        if (validVariants.isEmpty()) {
+            model.addAttribute("variantError", "Vui lòng thêm ít nhất một biến thể hợp lệ (có Size và Giá bán).");
+            List<DanhMucSanPham> danhMucs = danhMucRepository.findAllActive();
+            List<SizeSanPham> sizes = sizeRepository.findAllActive();
+            model.addAttribute("danhMucs", danhMucs);
+            model.addAttribute("sizes", sizes);
+            model.addAttribute("pageTitle", "Sửa Sản phẩm: " + sanPhamDTO.getTenSP());
+            model.addAttribute("isEdit", true);
+            return "nhanvien/sanpham/form";
+        }
+        sanPhamDTO.setBienThes(validVariants);
         
         try {
             SanPham updatedSanPham = sanPhamService.updateSanPham(maSP, sanPhamDTO);
@@ -241,7 +335,7 @@ public class SanPhamController {
             redirectAttributes.addFlashAttribute("successMessage", 
                     "Cập nhật sản phẩm '" + updatedSanPham.getTenSP() + "' thành công!");
             
-            return "redirect:/NhanVien/sanpham";
+            return "redirect:/NhanVien/san-pham";
             
         } catch (Exception e) {
             log.error("Error updating product", e);
@@ -259,39 +353,10 @@ public class SanPhamController {
         }
     }
     
-    /**
-     * Xem chi tiết sản phẩm
-     */
-    @GetMapping("/xem/{maSP}")
-    public String viewSanPham(@PathVariable Integer maSP,
-                              HttpSession session,
-                              Model model,
-                              RedirectAttributes redirectAttributes) {
-        
-        // Kiểm tra đăng nhập
-        if (session.getAttribute("loggedInNhanVien") == null) {
-            return "redirect:/NhanVien/login";
-        }
-        
-        // Lấy sản phẩm
-        Optional<SanPham> sanPhamOpt = sanPhamService.getSanPhamById(maSP);
-        if (sanPhamOpt.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm!");
-            return "redirect:/NhanVien/sanpham";
-        }
-        
-        SanPham sanPham = sanPhamOpt.get();
-        SanPhamDTO sanPhamDTO = sanPhamService.convertToDTO(sanPham);
-        
-        model.addAttribute("sanPham", sanPham);
-        model.addAttribute("sanPhamDTO", sanPhamDTO);
-        model.addAttribute("pageTitle", "Chi tiết: " + sanPham.getTenSP());
-        
-        return "nhanvien/sanpham/detail";
-    }
+    
     
     /**
-     * Xóa sản phẩm (soft delete)
+     * Xóa sản phẩm (hard delete) 
      */
     @PostMapping("/xoa/{maSP}")
     public String deleteSanPham(@PathVariable Integer maSP,
@@ -307,7 +372,64 @@ public class SanPhamController {
             Optional<SanPham> sanPhamOpt = sanPhamService.getSanPhamById(maSP);
             if (sanPhamOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm!");
-                return "redirect:/NhanVien/sanpham";
+                return "redirect:/NhanVien/san-pham";
+            }
+            
+            String tenSP = sanPhamOpt.get().getTenSP();
+            
+            // Thử xóa cứng sản phẩm
+            sanPhamService.deleteSanPham(maSP);
+            
+            log.info("Product hard deleted by employee {}: {}", 
+                    session.getAttribute("nhanVienUsername"), maSP);
+            
+            redirectAttributes.addFlashAttribute("successMessage", 
+                    "Xóa sản phẩm '" + tenSP + "' thành công!");
+            
+        } catch (RuntimeException e) {
+            log.error("Error deleting product: {}", maSP, e);
+            
+            // Nếu lỗi do ràng buộc, đề xuất dùng soft delete
+            if (e.getMessage().contains("đang được tham chiếu") || 
+                e.getMessage().contains("đã có trong đơn hàng") ||
+                e.getMessage().contains("constraint") ||
+                e.getMessage().contains("referential integrity")) {
+                
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                        "Không thể xóa sản phẩm: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("warningMessage", 
+                        "Gợi ý: Sử dụng tính năng 'Ngừng bán' thay vì xóa.");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                        "Có lỗi khi xóa sản phẩm: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            log.error("Unexpected error deleting product: {}", maSP, e);
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                    "Có lỗi không mong muốn khi xóa sản phẩm. Vui lòng thử lại.");
+        }
+        
+        return "redirect:/NhanVien/san-pham";
+    }
+    
+    /**
+     * Ngừng bán sản phẩm (soft delete) - Alternative to hard delete
+     */
+    @PostMapping("/ngung-ban/{maSP}")
+    public String stopSellingProduct(@PathVariable Integer maSP,
+                                    HttpSession session,
+                                    RedirectAttributes redirectAttributes) {
+        
+        // Kiểm tra đăng nhập
+        if (session.getAttribute("loggedInNhanVien") == null) {
+            return "redirect:/NhanVien/login";
+        }
+        
+        try {
+            Optional<SanPham> sanPhamOpt = sanPhamService.getSanPhamById(maSP);
+            if (sanPhamOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm!");
+                return "redirect:/NhanVien/san-pham";
             }
             
             String tenSP = sanPhamOpt.get().getTenSP();
@@ -317,15 +439,15 @@ public class SanPhamController {
                     session.getAttribute("nhanVienUsername"), maSP);
             
             redirectAttributes.addFlashAttribute("successMessage", 
-                    "Xóa sản phẩm '" + tenSP + "' thành công!");
+                    "Ngừng bán sản phẩm '" + tenSP + "' thành công!");
             
         } catch (Exception e) {
-            log.error("Error deleting product: {}", maSP, e);
+            log.error("Error soft deleting product: {}", maSP, e);
             redirectAttributes.addFlashAttribute("errorMessage", 
-                    "Có lỗi khi xóa sản phẩm: " + e.getMessage());
+                    "Có lỗi khi ngừng bán sản phẩm: " + e.getMessage());
         }
         
-        return "redirect:/NhanVien/sanpham";
+        return "redirect:/NhanVien/san-pham";
     }
     
     /**
@@ -345,7 +467,7 @@ public class SanPhamController {
             Optional<SanPham> sanPhamOpt = sanPhamService.getSanPhamById(maSP);
             if (sanPhamOpt.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy sản phẩm!");
-                return "redirect:/NhanVien/sanpham";
+                return "redirect:/NhanVien/san-pham";
             }
             
             SanPham sanPham = sanPhamOpt.get();
@@ -355,8 +477,9 @@ public class SanPhamController {
             byte newStatus = (byte) (sanPham.getTrangThai() == 1 ? 0 : 1);
             sanPham.setTrangThai(newStatus);
             
-            // Lưu lại
+            // Lưu lại chỉ trạng thái: tránh đụng đến biến thể
             SanPhamDTO dto = sanPhamService.convertToDTO(sanPham);
+            dto.setBienThes(null);
             sanPhamService.updateSanPham(maSP, dto);
             
             String statusText = newStatus == 1 ? "đang bán" : "ngừng bán";
@@ -364,8 +487,8 @@ public class SanPhamController {
             log.info("Product status changed by employee {}: {} -> {}", 
                     session.getAttribute("nhanVienUsername"), maSP, statusText);
             
-            redirectAttributes.addFlashAttribute("successMessage", 
-                    "Thay đổi trạng thái sản phẩm '" + tenSP + "' thành " + statusText + " thành công!");
+        redirectAttributes.addFlashAttribute("successMessage", 
+            "Thay đổi trạng thái sản phẩm '" + tenSP + "' thành " + statusText + " thành công!");
             
         } catch (Exception e) {
             log.error("Error changing product status: {}", maSP, e);
@@ -373,6 +496,15 @@ public class SanPhamController {
                     "Có lỗi khi thay đổi trạng thái sản phẩm: " + e.getMessage());
         }
         
-        return "redirect:/NhanVien/sanpham/xem/" + maSP;
+    return "redirect:/NhanVien/san-pham";
+    }
+
+    /**
+     * Truy cập thiếu mã sản phẩm khi sửa
+     */
+    @GetMapping("/sua")
+    public String showEditFormMissingId(RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Thiếu mã sản phẩm để chỉnh sửa.");
+        return "redirect:/NhanVien/san-pham";
     }
 }
