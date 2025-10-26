@@ -55,4 +55,37 @@ public class SuKienKhuyenMai {
         return (trangThai != null && trangThai == 1) && deletedAt == null && ngayBD != null && ngayKT != null
                 && (!today.isBefore(ngayBD)) && (!today.isAfter(ngayKT));
     }
+
+    // Compatibility methods
+    public Integer getId() {
+        return maKM;
+    }
+
+    public String getName() {
+        return tenSuKien;
+    }
+
+    public LocalDate getStartDate() {
+        return ngayBD;
+    }
+
+    public LocalDate getEndDate() {
+        return ngayKT;
+    }
+
+    public Integer getViews() {
+        return luotXem != null ? luotXem : 0;
+    }
+
+    public void setViews(int views) {
+        this.luotXem = views;
+    }
+
+    public String getImageUrl() {
+        return urlAnh;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.urlAnh = imageUrl;
+    }
 }

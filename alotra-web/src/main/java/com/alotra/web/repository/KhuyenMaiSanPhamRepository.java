@@ -2,6 +2,7 @@ package com.alotra.web.repository;
 
 import com.alotra.web.entity.KhuyenMaiSanPham;
 import com.alotra.web.entity.KhuyenMaiSanPhamId;
+import com.alotra.web.entity.SuKienKhuyenMai;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -30,4 +31,18 @@ public interface KhuyenMaiSanPhamRepository extends JpaRepository<KhuyenMaiSanPh
     @Modifying
     @Query("DELETE FROM KhuyenMaiSanPham k WHERE k.maKM = :maKM")
     void deleteByMaKM(@Param("maKM") Integer maKM);
+
+    // Additional methods for compatibility
+    // Compatibility-style methods using actual entity relationships
+    void deleteBySuKien(SuKienKhuyenMai suKien);
+
+    List<KhuyenMaiSanPham> findBySuKien(SuKienKhuyenMai suKien);
+
+    @Query("SELECT COUNT(k) > 0 FROM KhuyenMaiSanPham k WHERE k.suKien = :suKien AND k.maSP = :maSP")
+    boolean existsBySuKienAndMaSP(@Param("suKien") SuKienKhuyenMai suKien, @Param("maSP") Integer maSP);    /**
+     * Tìm phần trăm giảm giá tối đa đang hiệu lực cho sản phẩm
+     */
+    @Query("SELECT COALESCE(MAX(k.phanTramGiam), 0) FROM KhuyenMaiSanPham k JOIN k.suKien s " +
+            "WHERE k.maSP = :productId AND s.deletedAt IS NULL AND s.trangThai = 1 AND CURRENT_DATE BETWEEN s.ngayBD AND s.ngayKT")
+    Integer findActiveMaxDiscountPercentForProduct(@Param("productId") Long productId);
 }

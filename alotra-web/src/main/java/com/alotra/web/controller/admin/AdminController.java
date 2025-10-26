@@ -156,14 +156,19 @@ public class AdminController {
                 ra.addFlashAttribute("error", "Tên topping không được để trống.");
                 return topping.getId() == null ? "redirect:/admin/toppings/add" : ("redirect:/admin/toppings/edit/" + topping.getId());
             }
-            Topping dup = toppingRepository.findByNameIgnoreCaseAndDeletedAtIsNull(name);
+            Topping dup = toppingRepository.findByTenToppingIgnoreCaseAndDeletedAtIsNull(name);
             if (dup != null && (topping.getId() == null || !dup.getId().equals(topping.getId()))) {
                 ra.addFlashAttribute("error", "Tên topping đã tồn tại.");
                 return topping.getId() == null ? "redirect:/admin/toppings/add" : ("redirect:/admin/toppings/edit/" + topping.getId());
             }
             if (imageFile != null && !imageFile.isEmpty()) {
-                String url = cloudinaryService.uploadFile(imageFile);
-                topping.setImageUrl(url);
+                try {
+                    String url = cloudinaryService.uploadFile(imageFile);
+                    topping.setImageUrl(url);
+                } catch (Exception e) {
+                    ra.addFlashAttribute("error", "Lỗi upload ảnh: " + e.getMessage());
+                    return topping.getId() == null ? "redirect:/admin/toppings/add" : ("redirect:/admin/toppings/edit/" + topping.getId());
+                }
             }
             toppingRepository.save(topping);
             ra.addFlashAttribute("message", "Lưu topping thành công.");

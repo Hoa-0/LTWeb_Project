@@ -129,10 +129,10 @@ public class SanPhamServiceImpl implements SanPhamService {
             throw new RuntimeException("Vui lòng thêm ít nhất một biến thể sản phẩm");
         }
 
-        // Upload ảnh nếu có
+        // Set image URL if provided (không upload, chỉ set path)
         String imageUrl = null;
         if (sanPhamDTO.getAnhSanPham() != null && !sanPhamDTO.getAnhSanPham().isEmpty()) {
-            imageUrl = uploadImage(sanPhamDTO.getAnhSanPham());
+            imageUrl = sanPhamDTO.getAnhSanPham(); // Use provided path directly
         }
         
     // Tạo sản phẩm mới
@@ -186,8 +186,8 @@ public class SanPhamServiceImpl implements SanPhamService {
             if (sanPham.getUrlAnh() != null) {
                 deleteImage(sanPham.getUrlAnh());
             }
-            // Upload ảnh mới
-            String newImageUrl = uploadImage(sanPhamDTO.getAnhSanPham());
+            // Set ảnh mới (không upload, chỉ set path)
+            String newImageUrl = sanPhamDTO.getAnhSanPham();
             sanPham.setUrlAnh(newImageUrl);
 
             // Cập nhật media chính trong bảng ProductMedia

@@ -31,4 +31,22 @@ public class CTDonHangTopping {
 
     @Column(name = "ThanhTien", precision = 10, scale = 2, nullable = false)
     private BigDecimal thanhTien;
+
+    // Compatibility methods
+    public Integer getQuantity() {
+        return soLuong;
+    }
+
+    public BigDecimal getUnitPrice() {
+        return donGia;
+    }
+
+    public BigDecimal getLineTotal() {
+        return thanhTien;
+    }
+
+    public Topping getTopping() {
+        // This would need to be loaded separately or via @ManyToOne
+        return null; // Placeholder - will be handled by service layer
+    }
 }

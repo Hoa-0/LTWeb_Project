@@ -24,7 +24,7 @@ public class ProductService {
         // Use native query (SanPham + BienTheSanPham); map imageUrl from DB; fallback to placeholder only if empty
         return productRepository.findBestSellersNative().stream()
                 .map(row -> {
-                    BigDecimal minBase = row.getPrice();
+                    BigDecimal minBase = BigDecimal.valueOf(row.getPrice());
                     Integer percent = row.getId() != null ? promoRepo.findActiveMaxDiscountPercentForProduct(row.getId()) : null;
                     BigDecimal finalPrice = applyPercent(minBase, percent);
                     ProductDTO dto = new ProductDTO(
@@ -44,7 +44,7 @@ public class ProductService {
     public List<ProductDTO> listByCategory(Integer categoryId) {
         return productRepository.findListByCategoryNative(categoryId).stream()
                 .map(row -> {
-                    BigDecimal minBase = row.getPrice();
+                    BigDecimal minBase = BigDecimal.valueOf(row.getPrice());
                     Integer percent = row.getId() != null ? promoRepo.findActiveMaxDiscountPercentForProduct(row.getId()) : null;
                     BigDecimal finalPrice = applyPercent(minBase, percent);
                     ProductDTO dto = new ProductDTO(
@@ -66,7 +66,7 @@ public class ProductService {
         String kw = keyword.trim();
         return productRepository.searchByKeywordNative(kw).stream()
                 .map(row -> {
-                    BigDecimal minBase = row.getPrice();
+                    BigDecimal minBase = BigDecimal.valueOf(row.getPrice());
                     Integer percent = row.getId() != null ? promoRepo.findActiveMaxDiscountPercentForProduct(row.getId()) : null;
                     BigDecimal finalPrice = applyPercent(minBase, percent);
                     ProductDTO dto = new ProductDTO(
@@ -87,5 +87,10 @@ public class ProductService {
         if (percent == null || percent <= 0) return base;
         BigDecimal p = BigDecimal.valueOf(100 - Math.min(100, percent)).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
         return base.multiply(p).setScale(0, RoundingMode.HALF_UP); // round to VNĐ
+    }
+
+    // Additional method for compatibility
+    public List<ProductDTO> getAllActiveProducts() {
+        return listByCategory(null); // Returns all active products
     }
 }

@@ -1,7 +1,9 @@
 package com.alotra.web.controller.account;
 
+import com.alotra.web.entity.BienTheSanPham;
 import com.alotra.web.entity.GioHangCT;
 import com.alotra.web.entity.KhachHang;
+import com.alotra.web.entity.SanPham;
 import com.alotra.web.security.KhachHangUserDetails;
 import com.alotra.web.service.CartService;
 import org.springframework.stereotype.Controller;
@@ -39,14 +41,15 @@ public class CartController {
         Map<Integer, Map<Integer,Integer>> qtyMap = new HashMap<>();
         cartService.getToppingsForItems(items).forEach((itemId, list) -> {
             Map<Integer,Integer> inner = new HashMap<>();
-            list.forEach(t -> inner.put(t.getTopping().getId(), t.getQuantity()));
+            // TODO: Implement proper topping casting when getToppingsForItems is implemented
+            // list.forEach(t -> inner.put(t.getTopping().getId(), t.getQuantity()));
             qtyMap.put(itemId, inner);
         });
         model.addAttribute("itemTopQtyMap", qtyMap);
         // New: variants per item to allow changing size
-        Map<Integer, List<com.alotra.web.entity.ProductVariant>> itemVariantsMap = new HashMap<>();
+        Map<Integer, List<BienTheSanPham>> itemVariantsMap = new HashMap<>();
         for (GioHangCT it : items) {
-            var product = it.getVariant() != null ? it.getVariant().getProduct() : null;
+            SanPham product = it.getBienTheSanPham() != null ? it.getBienTheSanPham().getSanPham() : null;
             itemVariantsMap.put(it.getId(), cartService.listVariantsForProduct(product));
         }
         model.addAttribute("itemVariantsMap", itemVariantsMap);

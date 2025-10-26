@@ -16,10 +16,11 @@ public class KhachHangService {
         return khachHangRepository.findByEmail(email);
     }
     public KhachHang findByUsername(String username) {
-        return khachHangRepository.findByUsername(username);
+        // keep service API for callers but delegate to repository method that matches entity
+        return khachHangRepository.findByTenDangNhap(username);
     }
     public KhachHang findByPhone(String phone) {
-        return khachHangRepository.findByPhone(phone);
+        return khachHangRepository.findBySoDienThoai(phone);
     }
     public KhachHang save(KhachHang khachHang) {
         return khachHangRepository.save(khachHang);

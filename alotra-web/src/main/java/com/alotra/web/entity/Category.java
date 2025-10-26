@@ -2,6 +2,7 @@ package com.alotra.web.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -14,6 +15,9 @@ public class Category {
 
     @Column(nullable = false, length = 100, unique = true)
     private String name;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     // Một danh mục có nhiều sản phẩm
     @OneToMany(mappedBy = "category")

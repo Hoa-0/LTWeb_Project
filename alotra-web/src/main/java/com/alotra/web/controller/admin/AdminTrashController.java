@@ -69,7 +69,7 @@ public class AdminTrashController {
 
     @GetMapping("/products/{id}/restore")
     public String restoreProduct(@PathVariable Integer id, RedirectAttributes ra) {
-        productRepo.findById(id).ifPresent(p -> { p.setDeletedAt(null); productRepo.save(p); });
+        productRepo.findById(id.longValue()).ifPresent(p -> { p.setDeletedAt(null); productRepo.save(p); });
         ra.addFlashAttribute("message", "Đã khôi phục sản phẩm.");
         return "redirect:/admin/trash";
     }
@@ -110,7 +110,7 @@ public class AdminTrashController {
     @GetMapping("/products/{id}/delete")
     public String hardDeleteProduct(@PathVariable Integer id, RedirectAttributes ra) {
         try {
-            productRepo.deleteById(id);
+            productRepo.deleteById(id.longValue());
             ra.addFlashAttribute("message", "Đã xóa vĩnh viễn sản phẩm.");
         } catch (DataIntegrityViolationException ex) {
             ra.addFlashAttribute("error", "Không thể xóa vì còn dữ liệu tham chiếu (đơn hàng/khuyến mãi/biến thể).");
@@ -149,7 +149,7 @@ public class AdminTrashController {
         }
         SuKienKhuyenMai promo = opt.get();
         // Block hard delete when still applied to products
-        if (!promoLinkRepo.findByPromotion(promo).isEmpty()) {
+        if (!promoLinkRepo.findBySuKien(promo).isEmpty()) {
             ra.addFlashAttribute("error", "Sự kiện đang áp dụng sản phẩm, không thể xóa.");
             return "redirect:/admin/trash";
         }

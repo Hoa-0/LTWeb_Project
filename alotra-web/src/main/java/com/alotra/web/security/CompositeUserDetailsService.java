@@ -38,14 +38,14 @@ public class CompositeUserDetailsService implements UserDetailsService {
             return new KhachHangUserDetails(ghost);
         }
         // 1) Try staff first (NhanVien): allow username or email
-        NhanVien nv = nvRepo.findByUsername(u);
-        if (nv == null) nv = nvRepo.findByEmail(u);
+        NhanVien nv = nvRepo.findByUsername(u).orElse(null);
+        if (nv == null) nv = nvRepo.findByEmail(u).orElse(null);
         if (nv != null) {
             return new NhanVienUserDetails(nv);
         }
         // 2) Fallback to customers (KhachHang): allow username or email
-        KhachHang kh = khRepo.findByUsername(u);
-        if (kh == null) kh = khRepo.findByEmail(u);
+    KhachHang kh = khRepo.findByTenDangNhap(u);
+    if (kh == null) kh = khRepo.findByEmail(u);
         if (kh != null) {
             return new KhachHangUserDetails(kh);
         }

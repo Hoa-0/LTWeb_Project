@@ -1,5 +1,6 @@
 package com.alotra.web.controller.account;
 
+import com.alotra.web.entity.DonHang;
 import com.alotra.web.entity.GioHangCT;
 import com.alotra.web.entity.KhachHang;
 import com.alotra.web.security.KhachHangUserDetails;
@@ -64,7 +65,7 @@ public class CheckoutController {
                         @RequestParam(value = "shipAddress", required = false) String shipAddress,
                         RedirectAttributes ra) {
         try {
-            var order = cartService.checkoutWithOptions(
+            DonHang order = cartService.checkoutWithOptions(
                     principal.getKhachHang(), itemIds, paymentMethod, note, receivingMethod, shipName, shipPhone, shipAddress
             );
             if ("ChuyenKhoan".equalsIgnoreCase(paymentMethod)) {

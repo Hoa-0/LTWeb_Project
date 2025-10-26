@@ -82,11 +82,11 @@ public class OrderHistoryService {
         for (CTDonHang ct : items) {
             OrderItemRow r = new OrderItemRow();
             r.id = ct.getId();
-            ProductVariant v = ct.getVariant();
-            Product p = v != null ? v.getProduct() : null;
-            SizeSanPham sz = v != null ? v.getSize() : null;
-            r.productName = p != null ? p.getName() : null;
-            r.sizeName = sz != null ? sz.getName() : null;
+            BienTheSanPham v = ct.getVariant();
+            SanPham p = v != null ? v.getSanPham() : null;
+            String sz = v != null ? v.getSizeName() : null;
+            r.productName = p != null ? p.getTenSP() : null;
+            r.sizeName = sz;
             r.quantity = ct.getQuantity();
             r.unitPrice = ct.getUnitPrice();
             r.lineDiscount = ct.getLineDiscount();

@@ -16,7 +16,7 @@ public class NhanVienUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // VaiTro: 1 -> ADMIN (chủ cửa hàng), 2 -> VENDOR (nhân viên)
-        if (nv.getRole() != null && nv.getRole() == 1) {
+        if (nv.getRole() != null && "1".equals(nv.getRole())) {
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
         return List.of(new SimpleGrantedAuthority("ROLE_VENDOR"));

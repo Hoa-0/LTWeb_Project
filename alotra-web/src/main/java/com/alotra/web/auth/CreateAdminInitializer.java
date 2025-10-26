@@ -24,7 +24,7 @@ public class CreateAdminInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         // If a user with username 'boss' already exists, do nothing
-        KhachHang existing = repo.findByUsername("boss");
+    KhachHang existing = repo.findByTenDangNhap("boss");
         if (existing != null) {
             log.info("Admin account 'boss' already exists (id={}).", existing.getId());
             return;

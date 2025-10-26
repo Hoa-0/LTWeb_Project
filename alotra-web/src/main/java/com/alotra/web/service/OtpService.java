@@ -36,10 +36,10 @@ public class OtpService {
     @Transactional
     public void sendRegisterOtp(KhachHang kh) {
         // cleanup expired old codes for this user/type
-        otpRepo.deleteByCustomerAndTypeAndExpiresAtBefore(kh, TYPE_REGISTER, LocalDateTime.now().minusDays(1));
+        otpRepo.deleteByEmailAndTypeAndExpiresAtBefore(kh.getEmail(), TYPE_REGISTER, LocalDateTime.now().minusDays(1));
         String code = generateNumericCode(6);
         OtpCode otp = new OtpCode();
-        otp.setCustomer(kh);
+        otp.setEmail(kh.getEmail());
         otp.setType(TYPE_REGISTER);
         otp.setCode(code);
         otp.setExpiresAt(LocalDateTime.now().plusMinutes(5));
@@ -74,7 +74,7 @@ public class OtpService {
             if (error != null) error.append("Không tìm thấy tài khoản theo email.");
             return false;
         }
-        Optional<OtpCode> opt = otpRepo.findTopByCustomerAndTypeAndCodeOrderByIdDesc(kh, TYPE_REGISTER, code.trim());
+        Optional<OtpCode> opt = otpRepo.findTopByCustomerAndTypeAndCodeOrderByIdDesc(email, TYPE_REGISTER, code.trim());
         if (opt.isEmpty()) {
             if (error != null) error.append("Mã OTP không đúng.");
             return false;

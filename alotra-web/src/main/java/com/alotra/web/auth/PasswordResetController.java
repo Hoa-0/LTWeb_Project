@@ -116,7 +116,7 @@ public class PasswordResetController {
             khRepo.save(kh);
             updated = true;
         } else {
-            NhanVien nv = nvRepo.findByEmail(email);
+            NhanVien nv = nvRepo.findByEmail(email).orElse(null);
             if (nv != null) {
                 nv.setPasswordHash(passwordEncoder.encode(password));
                 nvRepo.save(nv);

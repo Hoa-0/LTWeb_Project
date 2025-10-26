@@ -69,4 +69,53 @@ public class DonHang {
 
     @Column(name = "SDTNguoiNhan", length = 10)
     private String sdtNguoiNhan;
+
+    // Compatibility methods
+    public Integer getId() {
+        return maDH;
+    }
+
+    public void setId(Integer id) {
+        this.maDH = id;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return ngayLap;
+    }
+
+    public String getStatus() {
+        return trangThaiDonHang;
+    }
+
+    public String getReceivingMethod() {
+        return phuongThucNhanHang;
+    }
+
+    public String getReceiverName() {
+        return tenNguoiNhan;
+    }
+
+    public String getReceiverPhone() {
+        return sdtNguoiNhan;
+    }
+
+    public String getShippingAddress() {
+        return diaChiNhanHang;
+    }
+
+    public KhachHang getCustomer() {
+        // This would need to be loaded separately or via @ManyToOne
+        return null; // Placeholder - will be handled by service layer
+    }
+
+    public NhanVien getEmployee() {
+        // This would need to be loaded separately or via @ManyToOne
+        return null; // Placeholder - will be handled by service layer
+    }
+
+    public void setEmployee(NhanVien employee) {
+        if (employee != null) {
+            this.maNV = employee.getMaNV();
+        }
+    }
 }

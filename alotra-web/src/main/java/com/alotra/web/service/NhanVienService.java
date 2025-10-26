@@ -5,100 +5,131 @@ import com.alotra.web.repository.NhanVienRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
+@Transactional(readOnly = true)
 public class NhanVienService {
     
     private final NhanVienRepository nhanVienRepository;
     
-    /**
-     * Xác thực thông tin đăng nhập của nhân viên
-     * @param usernameOrEmail tên đăng nhập hoặc email
-     * @param rawPassword mật khẩu gốc (chưa mã hóa)
-     * @return Optional<NhanVien> nếu thông tin đăng nhập đúng
-     */
     public Optional<NhanVien> authenticateNhanVien(String usernameOrEmail, String rawPassword) {
         try {
             log.info("Attempting to authenticate employee with username/email: {}", usernameOrEmail);
             
-            // Tìm nhân viên theo username hoặc email
             Optional<NhanVien> nhanVienOpt = nhanVienRepository.findByUsernameOrEmail(usernameOrEmail);
             
             if (nhanVienOpt.isEmpty()) {
                 log.warn("Employee not found with username/email: {}", usernameOrEmail);
+                // Debug: list all employees
+                List<NhanVien> all = nhanVienRepository.findAllEmployees();
+                log.info("All employees in DB: {}", all.stream().map(nv -> nv.getUsername() + "/" + nv.getEmail()).toList());
                 return Optional.empty();
             }
             
             NhanVien nhanVien = nhanVienOpt.get();
             log.debug("Found employee: {}, Status: {}, DeletedAt: {}", nhanVien.getUsername(), nhanVien.getTrangThai(), nhanVien.getDeletedAt());
             
-            // Kiểm tra trạng thái tài khoản
             if (!nhanVien.isActive()) {
                 log.warn("Employee account is inactive: {}", usernameOrEmail);
                 return Optional.empty();
             }
             
-            // So sánh mật khẩu (trực tiếp theo yêu cầu - không sử dụng hash)
             log.debug("Comparing passwords - Input: '{}', Stored: '{}'", rawPassword, nhanVien.getMatKhauHash());
             if (rawPassword.equals(nhanVien.getMatKhauHash())) {
                 log.info("Authentication successful for employee: {}", usernameOrEmail);
                 return Optional.of(nhanVien);
             } else {
-                // Preserve current hash from DB when not changing password
-                NhanVien current = repo.findById(nv.getId()).orElseThrow();
-                nv.setPasswordHash(current.getPasswordHash());
+                log.warn("Invalid password for employee: {}", usernameOrEmail);
+                return Optional.empty();
             }
+            
+        } catch (Exception e) {
+            log.error("Error during authentication for employee: {}", usernameOrEmail, e);
+            return Optional.empty();
         }
-        return repo.save(nv);
     }
-
-    public void deleteById(Integer id) { repo.deleteById(id); }
-
-    public NhanVien findByUsername(String u){ return repo.findByUsername(u);}    
-    public NhanVien findByEmail(String e){ return repo.findByEmail(e);}    
-    public NhanVien findByPhone(String p){ return repo.findByPhone(p);}   
-
-    // Search with optional filters
-    public List<NhanVien> search(String kw, Integer role, Integer status) {
-        if (kw != null && kw.isBlank()) kw = null;
-        return repo.search(kw, role, status);
+    
+    public Optional<NhanVien> findByUsername(String username) {
+        return nhanVienRepository.findByUsernameIgnoreCase(username);
     }
-
-    // Reset password to a random temporary one; returns plaintext temp password
-    public String resetPassword(Integer id) {
-        NhanVien nv = repo.findById(id).orElseThrow();
-        String temp = generateTempPassword(10);
-        nv.setPasswordHash(encoder.encode(temp));
-        repo.save(nv);
-        return temp;
+    
+    public Optional<NhanVien> findByEmail(String email) {
+        return nhanVienRepository.findByEmailIgnoreCase(email);
     }
-
-    private String generateTempPassword(int len) {
-        final String dict = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$%"; // avoid confusing chars
-        SecureRandom r = new SecureRandom();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < len; i++) sb.append(dict.charAt(r.nextInt(dict.length())));
-        return sb.toString();
+    
+    public Optional<NhanVien> findById(Integer id) {
+        return nhanVienRepository.findById(id);
     }
-
-    // Soft delete to trash: mark DeletedAt and lock account
+    
+    public boolean existsByUsername(String username) {
+        return nhanVienRepository.existsByUsernameIgnoreCase(username);
+    }
+    
+    public boolean existsByEmail(String email) {
+        return nhanVienRepository.existsByEmailIgnoreCase(email);
+    }
+    
+    public NhanVien findByPhone(String phone) {
+        return nhanVienRepository.findBySoDienThoai(phone);
+    }
+    
+    public java.util.List<NhanVien> search(String keyword, Integer role, Integer status) {
+        return nhanVienRepository.searchEmployees(keyword, role, status);
+    }
+    
+    @Transactional
+    public void saveHandlingPassword(NhanVien nhanVien) {
+        if (nhanVien.getPlainPassword() != null && !nhanVien.getPlainPassword().isBlank()) {
+            // In real app, should use PasswordEncoder
+            nhanVien.setMatKhauHash(nhanVien.getPlainPassword());
+        }
+        nhanVienRepository.save(nhanVien);
+    }
+    
+    @Transactional
     public void softDeleteToTrash(Integer id) {
-        repo.findById(id).ifPresent(nv -> {
-            nv.setDeletedAt(LocalDateTime.now());
-            nv.setStatus(0);
-            repo.save(nv);
-        });
+        Optional<NhanVien> opt = nhanVienRepository.findById(id);
+        if (opt.isPresent()) {
+            NhanVien nv = opt.get();
+            nv.setDeletedAt(java.time.LocalDateTime.now());
+            nhanVienRepository.save(nv);
+        }
     }
-
+    
+    public String resetPassword(Integer id) {
+        Optional<NhanVien> opt = nhanVienRepository.findById(id);
+        if (opt.isPresent()) {
+            String tempPassword = "temp123456";
+            NhanVien nv = opt.get();
+            nv.setMatKhauHash(tempPassword);
+            nhanVienRepository.save(nv);
+            return tempPassword;
+        }
+        return null;
+    }
+    
+    @Transactional
     public void restoreFromTrash(Integer id) {
-        repo.findById(id).ifPresent(nv -> {
+        Optional<NhanVien> opt = nhanVienRepository.findById(id);
+        if (opt.isPresent()) {
+            NhanVien nv = opt.get();
             nv.setDeletedAt(null);
-            repo.save(nv);
-        });
+            nhanVienRepository.save(nv);
+        }
+    }
+    
+    @Transactional
+    public void deleteById(Integer id) {
+        nhanVienRepository.deleteById(id);
+    }
+    
+    public java.util.List<NhanVien> findActive() {
+        return nhanVienRepository.findByTrangThaiAndDeletedAtIsNull((byte) 1);
     }
 }

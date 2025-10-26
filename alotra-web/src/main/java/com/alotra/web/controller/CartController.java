@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@Controller("cartControllerMain")
 public class CartController {
 
     @Autowired
@@ -59,7 +59,7 @@ public class CartController {
         return "redirect:/";
     }
 
-    @GetMapping("/cart")
+    @GetMapping("/cart-guest")
     public String showCart(HttpSession session, Model model) {
         Map<Long, CartItem> cart = getCartFromSession(session);
 

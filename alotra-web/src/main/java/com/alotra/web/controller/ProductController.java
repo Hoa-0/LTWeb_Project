@@ -46,13 +46,16 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Integer id, Model model) {
-        Product p = productRepo.findById(id).orElseThrow();
+    public String productDetail(@PathVariable Integer id, Model model) {
+        Product p = productRepo.findById(id.longValue()).orElseThrow();
         List<ProductVariant> variants = variantRepo.findByProduct(p);
         variants.removeIf(v -> v.getStatus() == null || v.getStatus() == 0);
         variants.sort(Comparator.comparing(ProductVariant::getPrice));
         List<Topping> toppings = toppingRepo.findByDeletedAtIsNull();
-        toppings.removeIf(t -> t.getStatus() != null && t.getStatus() == 0);
+        toppings.removeIf(t -> {
+            Integer status = t.getStatus();
+            return status == null || status == 0;
+        });
 
         Integer discountPercent = promoRepo.findActiveMaxDiscountPercentForProduct(p.getId());
         BigDecimal basePrice = (!variants.isEmpty() ? variants.get(0).getPrice() : BigDecimal.ZERO);

@@ -16,7 +16,7 @@ public class KhachHangUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        KhachHang kh = khachHangRepository.findByUsername(username);
+        KhachHang kh = khachHangRepository.findByTenDangNhap(username);
         if (kh == null) {
             // Also allow login by email
             kh = khachHangRepository.findByEmail(username);

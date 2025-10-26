@@ -146,11 +146,11 @@ public class UsersAdminController {
     @PostMapping("/employees/save")
     public String saveEmployee(@ModelAttribute("nv") @Valid NhanVien nv, BindingResult result, Model model, RedirectAttributes ra){
         // Validate unique username/email/phone
-        NhanVien byU = nv.getUsername()!=null ? nvService.findByUsername(nv.getUsername()) : null;
+        NhanVien byU = nv.getUsername()!=null ? nvService.findByUsername(nv.getUsername()).orElse(null) : null;
         if (byU != null && (nv.getId()==null || !byU.getId().equals(nv.getId()))) {
             result.rejectValue("username","dup","Tên đăng nhập đã tồn tại");
         }
-        NhanVien byE = nv.getEmail()!=null ? nvService.findByEmail(nv.getEmail()) : null;
+        NhanVien byE = nv.getEmail()!=null ? nvService.findByEmail(nv.getEmail()).orElse(null) : null;
         if (byE != null && (nv.getId()==null || !byE.getId().equals(nv.getId()))) {
             result.rejectValue("email","dup","Email đã tồn tại");
         }

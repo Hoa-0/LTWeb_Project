@@ -72,4 +72,75 @@ public class NhanVien {
             default -> "Unknown";
         };
     }
+
+    // Additional getter methods for compatibility
+    public Integer getId() {
+        return maNV;
+    }
+
+    public String getFullName() {
+        return tenNV;
+    }
+
+    public String getPasswordHash() {
+        return matKhauHash;
+    }
+
+    public Byte getStatus() {
+        return trangThai;
+    }
+
+    public String getRole() {
+        return getVaiTroText();
+    }
+
+    // Additional compatibility methods
+    public void setId(Integer id) {
+        this.maNV = id;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.matKhauHash = passwordHash;
+    }
+
+    // Phone field compatibility methods
+    public String getPhone() {
+        return this.soDienThoai;
+    }
+
+    public void setPhone(String phone) {
+        this.soDienThoai = phone;
+    }
+
+    // Transient fields for form handling
+    @Transient
+    private String plainPassword;
+
+    @Transient
+    private String confirmPassword;
+
+    public String getPlainPassword() {
+        return plainPassword;
+    }
+
+    public void setPlainPassword(String plainPassword) {
+        this.plainPassword = plainPassword;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
+
+    // Role and status setter methods
+    public void setRole(int role) {
+        this.vaiTro = (byte) role;
+    }
+
+    public void setStatus(int status) {
+        this.trangThai = (byte) status;
+    }
 }

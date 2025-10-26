@@ -205,4 +205,9 @@ public class CloudinaryService {
             return null;
         }
     }
+
+    // Alias for compatibility
+    public String uploadFile(MultipartFile file) throws IOException {
+        return uploadImage(file);
+    }
 }

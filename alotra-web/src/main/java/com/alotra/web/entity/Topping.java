@@ -38,4 +38,37 @@ public class Topping {
     public boolean isActive() {
         return trangThai != null && trangThai == 1 && deletedAt == null;
     }
+
+    // Compatibility methods
+    public Integer getId() {
+        return maTopping;
+    }
+
+    public void setId(Integer id) {
+        this.maTopping = id;
+    }
+
+    public String getName() {
+        return tenTopping;
+    }
+
+    public void setName(String name) {
+        this.tenTopping = name;
+    }
+
+    public String getImageUrl() {
+        return urlAnh;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.urlAnh = imageUrl;
+    }
+
+    public void setStatus(int status) {
+        this.trangThai = (byte) status;
+    }
+
+    public int getStatus() {
+        return trangThai != null ? trangThai.intValue() : 0;
+    }
 }

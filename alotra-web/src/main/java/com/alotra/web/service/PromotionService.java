@@ -29,14 +29,14 @@ public class PromotionService {
     @Transactional
     public void deleteById(Integer id) {
         promotionRepo.findById(id).ifPresent(p -> {
-            linkRepo.deleteByPromotion(p); // remove assignments first
+            linkRepo.deleteBySuKien(p); // remove assignments first
             promotionRepo.delete(p);
         });
     }
 
     public List<KhuyenMaiSanPham> listAssignments(Integer promotionId) {
         SuKienKhuyenMai p = promotionRepo.findById(promotionId).orElseThrow();
-        return linkRepo.findByPromotion(p);
+        return linkRepo.findBySuKien(p);
     }
 
     @Transactional
@@ -45,8 +45,8 @@ public class PromotionService {
             throw new IllegalArgumentException("Phần trăm giảm phải trong khoảng 1..100");
         }
         SuKienKhuyenMai promo = promotionRepo.findById(promotionId).orElseThrow();
-        Product product = productRepo.findById(productId).orElseThrow();
-        if (linkRepo.existsByPromotionAndProduct(promo, product)) return;
+        Product product = productRepo.findById(productId.longValue()).orElseThrow();
+        if (linkRepo.existsBySuKienAndMaSP(promo, productId)) return;
         KhuyenMaiSanPham link = new KhuyenMaiSanPham();
         link.setPromotion(promo);
         link.setProduct(product);
@@ -63,8 +63,8 @@ public class PromotionService {
 
     public List<Product> listUnassignedProducts(Integer promotionId) {
         SuKienKhuyenMai promo = promotionRepo.findById(promotionId).orElseThrow();
-        Set<Integer> assigned = new HashSet<>();
-        linkRepo.findByPromotion(promo).forEach(l -> assigned.add(l.getProduct().getId()));
+        Set<Long> assigned = new HashSet<>();
+        linkRepo.findBySuKien(promo).forEach(l -> assigned.add(l.getProduct().getId()));
         List<Product> all = productRepo.findAll();
         all.removeIf(p -> assigned.contains(p.getId()));
         return all;

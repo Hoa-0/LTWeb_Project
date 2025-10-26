@@ -39,7 +39,7 @@ public class PromotionController {
         // increment views and sync local object
         promoRepo.incrementViews(id);
         p.setViews((p.getViews() == null ? 0 : p.getViews()) + 1);
-        List<KhuyenMaiSanPham> assigned = linkRepo.findByPromotion(p);
+        List<KhuyenMaiSanPham> assigned = linkRepo.findBySuKien(p);
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String period = (p.getStartDate() != null ? df.format(p.getStartDate()) : "?") +
                 " - " + (p.getEndDate() != null ? df.format(p.getEndDate()) : "?");

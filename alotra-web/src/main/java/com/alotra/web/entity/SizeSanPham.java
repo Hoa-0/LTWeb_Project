@@ -31,4 +31,17 @@ public class SizeSanPham {
     public void setActive(boolean active) {
         this.trangThai = active ? (byte) 1 : (byte) 0;
     }
+
+    // Compatibility methods
+    public Integer getId() {
+        return maSize;
+    }
+
+    public String getName() {
+        return tenSize;
+    }
+
+    public void setId(Integer id) {
+        this.maSize = id;
+    }
 }

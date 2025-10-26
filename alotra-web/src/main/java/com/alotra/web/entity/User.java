@@ -3,6 +3,7 @@ package com.alotra.web.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -33,4 +34,25 @@ public class User {
     private String shopName;      // Tên cửa hàng
     private String shopAddress;   // Địa chỉ cửa hàng
     private boolean shopActive = false; // Shop chưa được admin duyệt mặc định
+
+    // Timestamp fields
+    @Column(name = "createdAt")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updatedAt")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "deletedAt")
+    private LocalDateTime deletedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

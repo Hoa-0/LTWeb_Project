@@ -27,6 +27,10 @@ public class CTDonHang {
     @Column(name = "MaBT", nullable = false)
     private Integer maBT;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaBT", insertable = false, updatable = false)
+    private BienTheSanPham bienTheSanPham;
+
     @Column(name = "SoLuong", nullable = false)
     private Integer soLuong;
 
@@ -41,4 +45,36 @@ public class CTDonHang {
 
     @Column(name = "GhiChu", length = 500)
     private String ghiChu;
+
+    // Compatibility methods
+
+    public Integer getQuantity() {
+        return soLuong;
+    }
+
+    public BigDecimal getUnitPrice() {
+        return donGia;
+    }
+
+    public BigDecimal getLineDiscount() {
+        return giamGiaDong != null ? giamGiaDong : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getLineTotal() {
+        return thanhTien;
+    }
+
+    public String getNote() {
+        return ghiChu;
+    }
+
+    public DonHang getOrder() {
+        return donHang;
+    }
+    public BienTheSanPham getVariant() {
+        return bienTheSanPham;
+    }
+    public Integer getId() {
+        return maCT;
+    }
 }

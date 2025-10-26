@@ -5,6 +5,7 @@ import com.alotra.web.dto.CreateOrderItemTopping;
 import com.alotra.web.dto.CreateOrderRequest;
 import com.alotra.web.entity.*;
 import com.alotra.web.repository.*;
+import com.alotra.web.service.OrderStatusResolver;
 import com.alotra.web.service.PosOrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class PosOrderServiceImpl implements PosOrderService {
     private final CTDonHangToppingRepository ctDonHangToppingRepository;
     private final BienTheSanPhamRepository bienTheSanPhamRepository;
     private final ToppingRepository toppingRepository;
-    private final com.alotra.web.service.OrderStatusResolver statusResolver;
+    private final OrderStatusResolver statusResolver;
     private final KhuyenMaiSanPhamRepository khuyenMaiSanPhamRepository;
 
     @Value("${app.pos.guest-customer-id:1}")

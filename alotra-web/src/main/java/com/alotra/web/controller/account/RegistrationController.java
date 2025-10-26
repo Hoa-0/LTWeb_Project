@@ -98,7 +98,7 @@ public class RegistrationController {
             return "redirect:/register";
         }
         // Duplicate guards
-        if (khRepo.findByUsername(form.getUsername()) != null) {
+    if (khRepo.findByTenDangNhap(form.getUsername()) != null) {
             ra.addFlashAttribute("error", "Tên đăng nhập đã tồn tại");
             ra.addFlashAttribute("registerForm", form);
             return "redirect:/register";
@@ -108,7 +108,7 @@ public class RegistrationController {
             ra.addFlashAttribute("registerForm", form);
             return "redirect:/register";
         }
-        if (form.getPhone() != null && !form.getPhone().isBlank() && khRepo.findByPhone(form.getPhone()) != null) {
+    if (form.getPhone() != null && !form.getPhone().isBlank() && khRepo.findBySoDienThoai(form.getPhone()) != null) {
             ra.addFlashAttribute("error", "Số điện thoại đã được sử dụng");
             ra.addFlashAttribute("registerForm", form);
             return "redirect:/register";
@@ -158,7 +158,7 @@ public class RegistrationController {
             return "redirect:/register/verify";
         }
         // Final duplicate guards to avoid race conditions
-        if (khRepo.findByUsername(pr.getUsername()) != null || khRepo.findByEmail(pr.getEmail()) != null) {
+    if (khRepo.findByTenDangNhap(pr.getUsername()) != null || khRepo.findByEmail(pr.getEmail()) != null) {
             session.removeAttribute("pendingReg");
             ra.addFlashAttribute("error", "Tài khoản/Email đã tồn tại. Vui lòng đăng ký lại bằng thông tin khác.");
             return "redirect:/register";

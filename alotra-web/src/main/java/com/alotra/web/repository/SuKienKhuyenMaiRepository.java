@@ -32,4 +32,23 @@ public interface SuKienKhuyenMaiRepository extends JpaRepository<SuKienKhuyenMai
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE SuKienKhuyenMai km SET km.trangThai = 0 WHERE km.deletedAt IS NULL AND km.trangThai = 1 AND km.ngayKT < :today")
     int deactivateExpired(@Param("today") LocalDate today);
+
+    // Additional method for compatibility
+    @Query("SELECT km FROM SuKienKhuyenMai km WHERE km.deletedAt IS NULL")
+    java.util.List<SuKienKhuyenMai> findByDeletedAtIsNull();
+
+    // Additional methods for PromotionController
+    @Query("SELECT km FROM SuKienKhuyenMai km WHERE km.trangThai = :status AND km.deletedAt IS NULL ORDER BY km.ngayBD DESC")
+    java.util.List<SuKienKhuyenMai> findTop8ByStatusAndDeletedAtIsNullOrderByStartDateDesc(@Param("status") int status, org.springframework.data.domain.Pageable pageable);
+
+    default java.util.List<SuKienKhuyenMai> findTop8ByStatusAndDeletedAtIsNullOrderByStartDateDesc(int status) {
+        return findTop8ByStatusAndDeletedAtIsNullOrderByStartDateDesc(status, org.springframework.data.domain.PageRequest.of(0, 8));
+    }
+
+    @Modifying
+    @Query("UPDATE SuKienKhuyenMai km SET km.luotXem = COALESCE(km.luotXem, 0) + 1 WHERE km.maKM = :id")
+    void incrementViews(@Param("id") Integer id);
+
+    // Additional methods for trash functionality
+    java.util.List<SuKienKhuyenMai> findByDeletedAtIsNotNull();
 }
