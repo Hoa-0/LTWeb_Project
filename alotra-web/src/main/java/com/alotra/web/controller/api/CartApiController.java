@@ -1,8 +1,8 @@
 package com.alotra.web.controller.api;
 
-import com.alotra.entity.KhachHang;
-import com.alotra.security.KhachHangUserDetails;
-import com.alotra.service.CartService;
+import com.alotra.web.entity.KhachHang;
+import com.alotra.web.security.KhachHangUserDetails;
+import com.alotra.web.service.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

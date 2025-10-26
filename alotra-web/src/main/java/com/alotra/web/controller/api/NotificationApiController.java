@@ -1,7 +1,7 @@
 package com.alotra.web.controller.api;
 
-import com.alotra.security.KhachHangUserDetails;
-import com.alotra.service.NotificationService;
+import com.alotra.web.security.KhachHangUserDetails;
+import com.alotra.web.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;

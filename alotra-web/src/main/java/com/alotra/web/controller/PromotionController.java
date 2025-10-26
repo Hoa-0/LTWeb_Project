@@ -1,9 +1,9 @@
 package com.alotra.web.controller;
 
-import com.alotra.entity.SuKienKhuyenMai;
-import com.alotra.entity.KhuyenMaiSanPham;
-import com.alotra.repository.SuKienKhuyenMaiRepository;
-import com.alotra.repository.KhuyenMaiSanPhamRepository;
+import com.alotra.web.entity.SuKienKhuyenMai;
+import com.alotra.web.entity.KhuyenMaiSanPham;
+import com.alotra.web.repository.SuKienKhuyenMaiRepository;
+import com.alotra.web.repository.KhuyenMaiSanPhamRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;

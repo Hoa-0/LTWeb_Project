@@ -1,9 +1,9 @@
 package com.alotra.web.controller.api;
 
-import com.alotra.dto.ProductDTO;
-import com.alotra.entity.Category;
-import com.alotra.service.CategoryService;
-import com.alotra.service.ProductService;
+import com.alotra.web.dto.ProductDTO;
+import com.alotra.web.entity.Category;
+import com.alotra.web.service.CategoryService;
+import com.alotra.web.service.ProductService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

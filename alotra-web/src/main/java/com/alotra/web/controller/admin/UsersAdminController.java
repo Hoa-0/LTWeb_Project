@@ -1,9 +1,9 @@
 package com.alotra.web.controller.admin;
 
-import com.alotra.entity.KhachHang;
-import com.alotra.entity.NhanVien;
-import com.alotra.service.KhachHangService;
-import com.alotra.service.NhanVienService;
+import com.alotra.web.entity.KhachHang;
+import com.alotra.web.entity.NhanVien;
+import com.alotra.web.service.KhachHangService;
+import com.alotra.web.service.NhanVienService;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;

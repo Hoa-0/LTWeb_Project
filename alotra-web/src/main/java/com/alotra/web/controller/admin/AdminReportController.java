@@ -1,8 +1,8 @@
 package com.alotra.web.controller.admin;
 
-import com.alotra.service.NhanVienService;
-import com.alotra.service.ShiftReportService;
-import com.alotra.service.ShiftReportService.ShiftReport;
+import com.alotra.web.service.NhanVienService;
+import com.alotra.web.service.ShiftReportService;
+import com.alotra.web.service.ShiftReportService.ShiftReport;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;

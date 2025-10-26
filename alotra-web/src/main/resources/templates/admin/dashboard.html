@@ -1,319 +1,155 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Alotra Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            margin: 0.25rem 1rem;
-            transition: all 0.3s ease;
-        }
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            transform: translateX(5px);
-        }
-        .main-content {
-            background-color: #f8f9fa;
-            min-height: 100vh;
-        }
-        .navbar {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .welcome-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        .stats-card {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-        .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-        }
-    </style>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/admin-layout :: layout(pageTitle='Tổng quan', pageContent=~{::pageContent})}">
+
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="position-sticky pt-3">
-                    <div class="text-center p-3">
-                        <div class="avatar mx-auto mb-2">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                        <h6 class="text-white" th:text="${nhanVien.tenNV}">Tên Nhân Viên</h6>
-                        <small class="text-white-50" th:text="${nhanVien.vaiTroText}">Vai trò</small>
-                    </div>
-                    
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" th:href="@{/admin/dashboard}">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" th:if="${nhanVien.isAdmin() or nhanVien.isManager()}">
-                                <i class="fas fa-users me-2"></i>
-                                Quản lý nhân viên
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-shopping-cart me-2"></i>
-                                Đơn hàng
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-box me-2"></i>
-                                Sản phẩm
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" th:if="${nhanVien.isAdmin()}">
-                                <i class="fas fa-chart-bar me-2"></i>
-                                Báo cáo
-                            </a>
-                        </li>
-                    </ul>
+<div class="page-content" th:fragment="pageContent" th:with="currentPage='dashboard'">
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card gradient-green h-100">
+                <div class="kpi-label">Doanh thu</div>
+                <div class="kpi-value" th:text="${#numbers.formatDecimal(stats.totalRevenue,0,'COMMA',0,'POINT')} + ' ₫'">0 ₫</div>
+                <div class="kpi-sub">Đã giao & thanh toán</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card gradient-blue h-100">
+                <div class="kpi-label">Đơn hàng</div>
+                <div class="kpi-value" th:text="${stats.totalOrders}">0</div>
+                <div class="kpi-sub">Tổng phát sinh</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card gradient-orange h-100">
+                <div class="kpi-label">Khách hàng</div>
+                <div class="kpi-value" th:text="${stats.totalCustomers}">0</div>
+                <div class="kpi-sub">Đã đăng ký</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card gradient-purple h-100">
+                <div class="kpi-label">Sản phẩm</div>
+                <div class="kpi-value" th:text="${stats.totalProducts}">0</div>
+                <div class="kpi-sub">Đang hoạt động</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card gradient-teal h-100">
+                <div class="kpi-label">Đánh giá</div>
+                <div class="kpi-value" th:text="${stats.totalReviews}">0</div>
+                <div class="kpi-sub">
+                    <span th:text="${#numbers.formatDecimal(stats.avgStars,1,'COMMA',1,'POINT')} + ' ★'">0.0 ★</span>
                 </div>
-            </nav>
-
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-                <!-- Navbar -->
-                <nav class="navbar navbar-expand-lg navbar-light sticky-top">
-                    <div class="container-fluid">
-                        <h4 class="navbar-brand mb-0">Dashboard</h4>
-                        <div class="navbar-nav ms-auto">
-                            <div class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-user-circle me-2"></i>
-                                    <span th:text="${nhanVien.tenNV}">Tên Nhân Viên</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" th:href="@{/admin/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </nav>
-
-                <!-- Content -->
-                <div class="container-fluid py-4">
-                    
-                    <!-- Success Message -->
-                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <span th:text="${successMessage}"></span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-
-                    <!-- Welcome Card -->
-                    <div class="welcome-card">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h3>Chào mừng trở lại, <span th:text="${nhanVien.tenNV}">Tên Nhân Viên</span>!</h3>
-                                <p class="mb-0">Hôm nay là ngày mới để phục vụ khách hàng tốt nhất. Chúc bạn làm việc hiệu quả!</p>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <div class="avatar" style="width: 80px; height: 80px; font-size: 2rem;">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stats Cards -->
-                    <div class="row">
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="stats-card">
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Đơn hàng hôm nay</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">25</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-shopping-cart fa-2x text-primary"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="stats-card">
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Doanh thu hôm nay</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">2,450,000₫</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-dollar-sign fa-2x text-success"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="stats-card">
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Sản phẩm</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">156</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-box fa-2x text-info"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="stats-card">
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Khách hàng</div>
-                                        <div class="h5 mb-0 font-weight-bold text-gray-800">1,284</div>
-                                    </div>
-                                    <div class="col-auto">
-                                        <i class="fas fa-users fa-2x text-warning"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Employee Info Card -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Thông tin tài khoản</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-sm-4"><strong>Mã nhân viên:</strong></div>
-                                        <div class="col-sm-8" th:text="${nhanVien.maNV}">001</div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-4"><strong>Tên đăng nhập:</strong></div>
-                                        <div class="col-sm-8" th:text="${nhanVien.username}">admin</div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-4"><strong>Email:</strong></div>
-                                        <div class="col-sm-8" th:text="${nhanVien.email}">admin@alotra.com</div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-4"><strong>Vai trò:</strong></div>
-                                        <div class="col-sm-8">
-                                            <span class="badge" 
-                                                  th:classappend="${nhanVien.isAdmin()} ? 'bg-danger' : (${nhanVien.isManager()} ? 'bg-warning' : 'bg-info')"
-                                                  th:text="${nhanVien.vaiTroText}">Quản trị viên</span>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-sm-4"><strong>Số điện thoại:</strong></div>
-                                        <div class="col-sm-8" th:text="${nhanVien.soDienThoai} ?: 'Chưa cập nhật'">0123456789</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Hoạt động gần đây</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="timeline">
-                                        <div class="d-flex mb-3">
-                                            <div class="flex-shrink-0">
-                                                <i class="fas fa-circle text-primary"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <div class="fw-bold">Đăng nhập thành công</div>
-                                                <div class="text-muted small">Vừa xong</div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex mb-3">
-                                            <div class="flex-shrink-0">
-                                                <i class="fas fa-circle text-success"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <div class="fw-bold">Xử lý đơn hàng #1234</div>
-                                                <div class="text-muted small">2 giờ trước</div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex mb-3">
-                                            <div class="flex-shrink-0">
-                                                <i class="fas fa-circle text-info"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <div class="fw-bold">Cập nhật sản phẩm</div>
-                                                <div class="text-muted small">5 giờ trước</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="kpi-card gradient-gray h-100">
+                <div class="kpi-label">Tỷ lệ đánh giá</div>
+                <div class="kpi-value" th:text="${stats.avgStars != null ? #numbers.formatDecimal(stats.avgStars,1,'COMMA',1,'POINT') : '0'}">0</div>
+                <div class="kpi-sub">Điểm trung bình</div>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Auto dismiss alerts -->
-    <script>
-        setTimeout(function() {
-            var alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
+    <div class="row g-3 mb-3">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">Doanh thu 14 ngày gần nhất</span>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Trạng thái đơn hàng</div>
+                <div class="card-body">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-xl-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Top sản phẩm</div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0 align-middle">
+                        <thead><tr><th>#</th><th>Sản phẩm</th><th class="text-end">SL</th><th class="text-end">Doanh thu</th></tr></thead>
+                        <tbody>
+                        <tr th:each="p,iter : ${stats.topProducts}">
+                            <td th:text="${iter.index+1}"></td>
+                            <td th:text="${p['name']}"></td>
+                            <td class="text-end" th:text="${p['qty']}"></td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(p['amount'],0,'COMMA',0,'POINT')} + ' ₫'"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(stats.topProducts)}"><td colspan="4" class="text-center text-muted">Chưa có dữ liệu.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card h-100">
+                <div class="card-header fw-semibold">Top khách hàng</div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0 align-middle">
+                        <thead><tr><th>#</th><th>Khách hàng</th><th class="text-end">Đơn</th><th class="text-end">Chi tiêu</th></tr></thead>
+                        <tbody>
+                        <tr th:each="c,iter : ${stats.topCustomers}">
+                            <td th:text="${iter.index+1}"></td>
+                            <td th:text="${c['name']}"></td>
+                            <td class="text-end" th:text="${c['orders']}"></td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(c['spend'],0,'COMMA',0,'POINT')} + ' ₫'"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(stats.topCustomers)}"><td colspan="4" class="text-center text-muted">Chưa có dữ liệu.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header fw-semibold">Doanh thu theo danh mục</div>
+                <div class="card-body">
+                    <canvas id="categoryChart" height="110"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const revenueDaily = /*[[${stats.revenueDaily}]]*/ [];
+        const orderStatus = /*[[${stats.orderStatus}]]*/ [];
+        const categorySales = /*[[${stats.categorySales}]]*/ [];
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function(){
+            // Revenue line
+            const revLabels = revenueDaily.map(r=>r.date);
+            const revData = revenueDaily.map(r=> Number(r.total));
+            new Chart(document.getElementById('revenueChart'), {
+                type:'line',
+                data:{ labels:revLabels, datasets:[{ label:'Doanh thu (₫)', data:revData, tension:.35, fill:true, borderColor:'#198754', backgroundColor:'rgba(25,135,84,.15)', pointRadius:3}]},
+                options:{ plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ callback:v=> v.toLocaleString('vi-VN')}}}}
+            });
+            // Status donut
+            const stLabels = orderStatus.map(s=>s.status||'N/A');
+            const stVals = orderStatus.map(s=>s.count);
+            new Chart(document.getElementById('statusChart'), { type:'doughnut', data:{ labels:stLabels, datasets:[{ data:stVals, backgroundColor:['#0d6efd','#ffc107','#dc3545','#198754','#6f42c1','#20c997']}]}, options:{ plugins:{legend:{position:'bottom'}}, cutout:'55%'}});
+            // Category bar
+            const catLabels = categorySales.map(c=>c.name||'Không rõ');
+            const catVals = categorySales.map(c=> Number(c.amount));
+            new Chart(document.getElementById('categoryChart'), { type:'bar', data:{ labels:catLabels, datasets:[{ label:'Doanh thu (₫)', data:catVals, backgroundColor:'#6610f2'}]}, options:{ plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ callback:v=> v.toLocaleString('vi-VN')}} }}});
+        })();
+    </script>
+</div>
 </body>
 </html>

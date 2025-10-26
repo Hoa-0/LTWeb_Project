@@ -1,7 +1,7 @@
 package com.alotra.web.auth;
 
-import com.alotra.entity.KhachHang;
-import com.alotra.repository.KhachHangRepository;
+import com.alotra.web.entity.KhachHang;
+import com.alotra.web.repository.KhachHangRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -1,13 +1,13 @@
 package com.alotra.web.controller;
 
-import com.alotra.entity.*;
-import com.alotra.repository.ProductRepository;
-import com.alotra.repository.ProductVariantRepository;
-import com.alotra.repository.ToppingRepository;
-import com.alotra.repository.KhuyenMaiSanPhamRepository;
-import com.alotra.security.KhachHangUserDetails;
-import com.alotra.service.CartService;
-import com.alotra.service.KhachHangService;
+import com.alotra.web.entity.*;
+import com.alotra.web.repository.ProductRepository;
+import com.alotra.web.repository.ProductVariantRepository;
+import com.alotra.web.repository.ToppingRepository;
+import com.alotra.web.repository.KhuyenMaiSanPhamRepository;
+import com.alotra.web.security.KhachHangUserDetails;
+import com.alotra.web.service.CartService;
+import com.alotra.web.service.KhachHangService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,7 +27,7 @@ public class ProductController {
     private final CartService cartService;
     private final KhachHangService khService;
     private final KhuyenMaiSanPhamRepository promoRepo;
-    private final com.alotra.service.ReviewService reviewService;
+    private final com.alotra.web.service.ReviewService reviewService;
 
     public ProductController(ProductRepository productRepo,
                              ProductVariantRepository variantRepo,
@@ -35,7 +35,7 @@ public class ProductController {
                              CartService cartService,
                              KhachHangService khService,
                              KhuyenMaiSanPhamRepository promoRepo,
-                             com.alotra.service.ReviewService reviewService) {
+                             com.alotra.web.service.ReviewService reviewService) {
         this.productRepo = productRepo;
         this.variantRepo = variantRepo;
         this.toppingRepo = toppingRepo;
@@ -59,7 +59,7 @@ public class ProductController {
         BigDecimal discountedPrice = applyPercent(basePrice, discountPercent);
 
         // Fetch reviews for this product (newest first)
-        java.util.List<com.alotra.entity.DanhGia> reviews = reviewService.listByProduct(id, null);
+        java.util.List<com.alotra.web.entity.DanhGia> reviews = reviewService.listByProduct(id, null);
 
         model.addAttribute("pageTitle", p.getName());
         model.addAttribute("product", p);

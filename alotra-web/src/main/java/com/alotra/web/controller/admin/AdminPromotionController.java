@@ -1,10 +1,10 @@
 package com.alotra.web.controller.admin;
 
-import com.alotra.entity.KhuyenMaiSanPham;
-import com.alotra.entity.SuKienKhuyenMai;
-import com.alotra.entity.Product;
-import com.alotra.service.PromotionService;
-import com.alotra.service.CloudinaryService;
+import com.alotra.web.entity.KhuyenMaiSanPham;
+import com.alotra.web.entity.SuKienKhuyenMai;
+import com.alotra.web.entity.Product;
+import com.alotra.web.service.PromotionService;
+import com.alotra.web.service.CloudinaryService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

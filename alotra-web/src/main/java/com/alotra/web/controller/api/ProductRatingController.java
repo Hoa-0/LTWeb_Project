@@ -1,7 +1,7 @@
 package com.alotra.web.controller.api;
 
-import com.alotra.repository.DanhGiaRepository;
-import com.alotra.service.ReviewService;
+import com.alotra.web.repository.DanhGiaRepository;
+import com.alotra.web.service.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

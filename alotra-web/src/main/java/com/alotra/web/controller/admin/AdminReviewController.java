@@ -1,8 +1,8 @@
 package com.alotra.web.controller.admin;
 
-import com.alotra.entity.DanhGia;
-import com.alotra.repository.DanhGiaRepository;
-import com.alotra.service.EmailService;
+import com.alotra.web.entity.DanhGia;
+import com.alotra.web.repository.DanhGiaRepository;
+import com.alotra.web.service.EmailService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

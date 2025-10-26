@@ -1,13 +1,13 @@
 package com.alotra.web.controller.vendor;
 
-import com.alotra.entity.DonHang;
-import com.alotra.entity.NhanVien;
-import com.alotra.repository.DonHangRepository;
-import com.alotra.service.OrderHistoryService;
-import com.alotra.service.VendorOrderService;
-import com.alotra.service.OrderHistoryService.OrderItemRow;
-import com.alotra.service.OrderHistoryService.ItemToppingRow;
-import com.alotra.service.OrderHistoryService.OrderRow;
+import com.alotra.web.entity.DonHang;
+import com.alotra.web.entity.NhanVien;
+import com.alotra.web.repository.DonHangRepository;
+import com.alotra.web.service.OrderHistoryService;
+import com.alotra.web.service.VendorOrderService;
+import com.alotra.web.service.OrderHistoryService.OrderItemRow;
+import com.alotra.web.service.OrderHistoryService.ItemToppingRow;
+import com.alotra.web.service.OrderHistoryService.OrderRow;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alotra.security.NhanVienUserDetails;
+import com.alotra.web.security.NhanVienUserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @Controller

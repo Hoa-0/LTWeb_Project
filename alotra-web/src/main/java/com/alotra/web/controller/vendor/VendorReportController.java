@@ -1,9 +1,9 @@
 package com.alotra.web.controller.vendor;
 
-import com.alotra.security.NhanVienUserDetails;
-import com.alotra.service.NhanVienService;
-import com.alotra.service.ShiftReportService;
-import com.alotra.service.ShiftReportService.ShiftReport;
+import com.alotra.web.security.NhanVienUserDetails;
+import com.alotra.web.service.NhanVienService;
+import com.alotra.web.service.ShiftReportService;
+import com.alotra.web.service.ShiftReportService.ShiftReport;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;

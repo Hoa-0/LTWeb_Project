@@ -1,7 +1,7 @@
 package com.alotra.web.controller.admin;
 
-import com.alotra.entity.KhachHang;
-import com.alotra.service.KhachHangService;
+import com.alotra.web.entity.KhachHang;
+import com.alotra.web.service.KhachHangService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

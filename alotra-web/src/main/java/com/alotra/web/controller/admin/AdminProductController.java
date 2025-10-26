@@ -1,15 +1,15 @@
 package com.alotra.web.controller.admin;
 
 
-import com.alotra.entity.Category;
-import com.alotra.entity.Product;
-import com.alotra.entity.ProductVariant;
-import com.alotra.entity.SizeSanPham;
-import com.alotra.repository.CategoryRepository;
-import com.alotra.repository.ProductRepository;
-import com.alotra.repository.ProductVariantRepository;
-import com.alotra.repository.SizeSanPhamRepository;
-import com.alotra.service.CloudinaryService;
+import com.alotra.web.entity.Category;
+import com.alotra.web.entity.Product;
+import com.alotra.web.entity.ProductVariant;
+import com.alotra.web.entity.SizeSanPham;
+import com.alotra.web.repository.CategoryRepository;
+import com.alotra.web.repository.ProductRepository;
+import com.alotra.web.repository.ProductVariantRepository;
+import com.alotra.web.repository.SizeSanPhamRepository;
+import com.alotra.web.service.CloudinaryService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,16 +31,16 @@ public class AdminProductController {
     private final ProductVariantRepository variantRepository;
     private final CloudinaryService cloudinaryService;
     // New: prevent delete when referenced
-    private final com.alotra.repository.KhuyenMaiSanPhamRepository promoLinkRepository;
-    private final com.alotra.repository.CTDonHangRepository orderLineRepository;
+    private final com.alotra.web.repository.KhuyenMaiSanPhamRepository promoLinkRepository;
+    private final com.alotra.web.repository.CTDonHangRepository orderLineRepository;
 
     public AdminProductController(ProductRepository productRepository,
                                   CategoryRepository categoryRepository,
                                   SizeSanPhamRepository sizeRepository,
                                   ProductVariantRepository variantRepository,
                                   CloudinaryService cloudinaryService,
-                                  com.alotra.repository.KhuyenMaiSanPhamRepository promoLinkRepository,
-                                  com.alotra.repository.CTDonHangRepository orderLineRepository) {
+                                  com.alotra.web.repository.KhuyenMaiSanPhamRepository promoLinkRepository,
+                                  com.alotra.web.repository.CTDonHangRepository orderLineRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.sizeRepository = sizeRepository;
