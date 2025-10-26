@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{nhanvien/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm/Sửa khuyến mãi</title>
+</head>
+<body>
+    <div layout:fragment="content" data-page="khuyenmai">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark">
+                <i class="fas fa-tag me-2"></i>Thêm khuyến mãi mới
+            </h2>
+            <a href="/NhanVien/khuyenmai" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
+
+        <form>
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Basic Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Thông tin cơ bản</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Mã khuyến mãi <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="VD: SUMMER2024" required>
+                                        <small class="form-text text-muted">Mã duy nhất, không có khoảng trắng</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Tên khuyến mãi <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" placeholder="VD: Giảm giá mùa hè" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mô tả</label>
+                                <textarea class="form-control" rows="3" placeholder="Mô tả chi tiết về chương trình khuyến mãi"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Discount Configuration -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Cấu hình giảm giá</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Loại khuyến mãi <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="discountType" required>
+                                            <option value="">Chọn loại khuyến mãi</option>
+                                            <option value="percentage">Giảm theo phần trăm (%)</option>
+                                            <option value="fixed">Giảm số tiền cố định (VNĐ)</option>
+                                            <option value="freeship">Miễn phí giao hàng</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3" id="discountValueGroup">
+                                        <label class="form-label">Giá trị giảm <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="discountValue" placeholder="0" required>
+                                            <span class="input-group-text" id="valueUnit">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Giá trị đơn hàng tối thiểu</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" placeholder="0">
+                                            <span class="input-group-text">VNĐ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Giảm tối đa</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" placeholder="Không giới hạn">
+                                            <span class="input-group-text">VNĐ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Limits -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Giới hạn sử dụng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Số lần sử dụng tối đa</label>
+                                        <input type="number" class="form-control" placeholder="Không giới hạn">
+                                        <small class="form-text text-muted">Để trống nếu không giới hạn</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Số lần sử dụng/khách hàng</label>
+                                        <input type="number" class="form-control" placeholder="1" value="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <!-- Time Settings -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Thời gian áp dụng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Trạng thái</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="isActive" checked>
+                                <label class="form-check-label" for="isActive">
+                                    Kích hoạt khuyến mãi
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">Khuyến mãi sẽ có hiệu lực ngay khi được lưu</small>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Lưu khuyến mãi
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary">
+                                    <i class="fas fa-eye me-1"></i>Xem trước
+                                </button>
+                                <a href="/NhanVien/khuyenmai" class="btn btn-secondary">
+                                    <i class="fas fa-times me-1"></i>Hủy bỏ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script layout:fragment="scripts">
+        document.getElementById('discountType').addEventListener('change', function() {
+            const valueUnit = document.getElementById('valueUnit');
+            const discountValueGroup = document.getElementById('discountValueGroup');
+            
+            switch(this.value) {
+                case 'percentage':
+                    valueUnit.textContent = '%';
+                    discountValueGroup.style.display = 'block';
+                    break;
+                case 'fixed':
+                    valueUnit.textContent = 'VNĐ';
+                    discountValueGroup.style.display = 'block';
+                    break;
+                case 'freeship':
+                    discountValueGroup.style.display = 'none';
+                    break;
+                default:
+                    discountValueGroup.style.display = 'block';
+                    valueUnit.textContent = '%';
+            }
+        });
+    </script>
+</body>
+</html>

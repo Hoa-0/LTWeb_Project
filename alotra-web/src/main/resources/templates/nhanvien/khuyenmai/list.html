@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{nhanvien/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý khuyến mãi</title>
+</head>
+<body>
+    <div layout:fragment="content" data-page="khuyenmai">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark">
+                <i class="fas fa-tags me-2"></i>Quản lý khuyến mãi
+            </h2>
+            <a href="/NhanVien/khuyenmai/them" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Thêm khuyến mãi
+            </a>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select">
+                            <option value="">Tất cả</option>
+                            <option value="active">Đang hoạt động</option>
+                            <option value="inactive">Tạm ngưng</option>
+                            <option value="expired">Hết hạn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Loại khuyến mãi</label>
+                        <select class="form-select">
+                            <option value="">Tất cả</option>
+                            <option value="percentage">Giảm theo %</option>
+                            <option value="fixed">Giảm cố định</option>
+                            <option value="freeship">Miễn phí ship</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tìm kiếm</label>
+                        <input type="text" class="form-control" placeholder="Nhập mã hoặc tên khuyến mãi...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i>Tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Tổng khuyến mãi</h6>
+                                <h3 class="mb-0">24</h3>
+                            </div>
+                            <i class="fas fa-tags fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Đang hoạt động</h6>
+                                <h3 class="mb-0">8</h3>
+                            </div>
+                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Sắp hết hạn</h6>
+                                <h3 class="mb-0">3</h3>
+                            </div>
+                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Đã hết hạn</h6>
+                                <h3 class="mb-0">5</h3>
+                            </div>
+                            <i class="fas fa-times-circle fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promotions Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Danh sách khuyến mãi</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Mã KM</th>
+                                <th>Tên khuyến mãi</th>
+                                <th>Loại</th>
+                                <th>Giá trị</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sample data -->
+                            <tr>
+                                <td>KM001</td>
+                                <td>Giảm giá mùa hè</td>
+                                <td>Giảm theo %</td>
+                                <td>20%</td>
+                                <td>01/06/2024</td>
+                                <td>31/08/2024</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td>
+                                    <a href="/NhanVien/khuyenmai/xem/1" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/NhanVien/khuyenmai/sua/1" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>KM002</td>
+                                <td>Miễn phí ship đơn 200k</td>
+                                <td>Miễn phí ship</td>
+                                <td>200,000đ</td>
+                                <td>01/01/2024</td>
+                                <td>31/12/2024</td>
+                                <td><span class="badge bg-success">Hoạt động</span></td>
+                                <td>
+                                    <a href="/NhanVien/khuyenmai/xem/2" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/NhanVien/khuyenmai/sua/2" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>KM003</td>
+                                <td>Giảm 50k cho khách mới</td>
+                                <td>Giảm cố định</td>
+                                <td>50,000đ</td>
+                                <td>15/01/2024</td>
+                                <td>15/02/2024</td>
+                                <td><span class="badge bg-warning">Sắp hết hạn</span></td>
+                                <td>
+                                    <a href="/NhanVien/khuyenmai/xem/3" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/NhanVien/khuyenmai/sua/3" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">Trước</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

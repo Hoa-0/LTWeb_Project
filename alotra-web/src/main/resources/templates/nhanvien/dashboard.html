@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{nhanvien/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Quản lý Nhân viên</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div layout:fragment="content" data-page="dashboard">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Tổng quan hoạt động kinh doanh của bạn</p>
+        </div>
+
+        <!-- Stats Cards Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number" id="totalProducts">0</div>
+                            <div class="stats-label">Tổng sản phẩm</div>
+                        </div>
+                        <i class="fas fa-box fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number" id="totalOrders">0</div>
+                            <div class="stats-label">Đơn hàng hôm nay</div>
+                        </div>
+                        <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card" style="background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number" id="pendingOrders">0</div>
+                            <div class="stats-label">Đơn hàng chờ xử lý</div>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card" style="background: linear-gradient(135deg, #4776e6 0%, #8e54e9 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number" id="monthlyRevenue">0₫</div>
+                            <div class="stats-label">Doanh thu tháng này</div>
+                        </div>
+                        <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Doanh thu 7 ngày qua</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Trạng thái đơn hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="orderStatusChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders and Top Products -->
+        <div class="row g-4">
+            <div class="col-xl-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Đơn hàng gần đây</h5>
+                        <a th:href="@{/NhanVien/donhang}" class="btn btn-sm btn-outline-primary">
+                            Xem tất cả
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày đặt</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrdersTable">
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Sản phẩm bán chạy</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="topProductsList">
+                            <div class="text-center py-4">
+                                <i class="fas fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-4 mt-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Thao tác nhanh</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <a th:href="@{/NhanVien/sanpham/them}" class="btn btn-primary w-100">
+                                    <i class="fas fa-plus me-2"></i>Thêm sản phẩm mới
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/NhanVien/donhang}" class="btn btn-success w-100">
+                                    <i class="fas fa-eye me-2"></i>Xem đơn hàng
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/NhanVien/khuyenmai/them}" class="btn btn-warning w-100">
+                                    <i class="fas fa-tags me-2"></i>Tạo khuyến mãi
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a th:href="@{/NhanVien/doanhthu}" class="btn btn-info w-100">
+                                    <i class="fas fa-chart-bar me-2"></i>Xem báo cáo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Dashboard specific scripts -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load dashboard data
+            loadDashboardData();
+            
+            // Initialize charts
+            initRevenueChart();
+            initOrderStatusChart();
+        });
+
+        function loadDashboardData() {
+            // Load stats (placeholder data)
+            document.getElementById('totalProducts').textContent = '24';
+            document.getElementById('totalOrders').textContent = '8';
+            document.getElementById('pendingOrders').textContent = '3';
+            document.getElementById('monthlyRevenue').textContent = '15,750,000₫';
+            
+            // Load recent orders (placeholder)
+            loadRecentOrders();
+            
+            // Load top products (placeholder)
+            loadTopProducts();
+        }
+
+        function loadRecentOrders() {
+            const tableBody = document.getElementById('recentOrdersTable');
+            const sampleOrders = [
+                { id: 'DH001', customer: 'Nguyễn Văn A', total: '250,000₫', status: 'Đã xác nhận', date: '25/10/2025' },
+                { id: 'DH002', customer: 'Trần Thị B', total: '180,000₫', status: 'Chờ xử lý', date: '25/10/2025' },
+                { id: 'DH003', customer: 'Lê Văn C', total: '320,000₫', status: 'Đang giao', date: '24/10/2025' },
+                { id: 'DH004', customer: 'Phạm Thị D', total: '150,000₫', status: 'Hoàn thành', date: '24/10/2025' },
+                { id: 'DH005', customer: 'Hoàng Văn E', total: '280,000₫', status: 'Chờ xử lý', date: '23/10/2025' }
+            ];
+            
+            tableBody.innerHTML = '';
+            sampleOrders.forEach(order => {
+                let statusBadge = '';
+                switch(order.status) {
+                    case 'Đã xác nhận':
+                        statusBadge = '<span class="badge bg-primary">Đã xác nhận</span>';
+                        break;
+                    case 'Chờ xử lý':
+                        statusBadge = '<span class="badge bg-warning">Chờ xử lý</span>';
+                        break;
+                    case 'Đang giao':
+                        statusBadge = '<span class="badge bg-info">Đang giao</span>';
+                        break;
+                    case 'Hoàn thành':
+                        statusBadge = '<span class="badge bg-success">Hoàn thành</span>';
+                        break;
+                }
+                
+                tableBody.innerHTML += `
+                    <tr>
+                        <td><strong>${order.id}</strong></td>
+                        <td>${order.customer}</td>
+                        <td><strong>${order.total}</strong></td>
+                        <td>${statusBadge}</td>
+                        <td>${order.date}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function loadTopProducts() {
+            const container = document.getElementById('topProductsList');
+            const sampleProducts = [
+                { name: 'Trà sữa truyền thống', sales: 45, revenue: '2,250,000₫' },
+                { name: 'Trà đào cam sả', sales: 38, revenue: '1,900,000₫' },
+                { name: 'Trà sữa chocolate', sales: 32, revenue: '1,600,000₫' },
+                { name: 'Trà xanh matcha', sales: 28, revenue: '1,400,000₫' },
+                { name: 'Trà oolong milk tea', sales: 25, revenue: '1,250,000₫' }
+            ];
+            
+            let html = '';
+            sampleProducts.forEach((product, index) => {
+                html += `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="badge bg-primary rounded-pill">${index + 1}</span>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">${product.name}</div>
+                                <small class="text-muted">${product.sales} ly bán ra</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold text-success">${product.revenue}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function initRevenueChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['19/10', '20/10', '21/10', '22/10', '23/10', '24/10', '25/10'],
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: [1200000, 1500000, 980000, 1800000, 2100000, 1650000, 1950000],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND'
+                                    }).format(value);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function initOrderStatusChart() {
+            const ctx = document.getElementById('orderStatusChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hoàn thành', 'Đang giao', 'Đã xác nhận', 'Chờ xử lý'],
+                    datasets: [{
+                        data: [45, 20, 15, 20],
+                        backgroundColor: [
+                            '#28a745',
+                            '#17a2b8',
+                            '#007bff',
+                            '#ffc107'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        </script>
+    </div>
+</body>
+</html>

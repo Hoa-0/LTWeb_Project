@@ -5,11 +5,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+<<<<<<< HEAD
 import org.springframework.security.core.userdetails.UserDetailsService;
+=======
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+>>>>>>> e66511f5f76c02a6c7a92993afb90a3d8655037c
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 @Configuration
 @EnableWebSecurity
@@ -54,11 +61,24 @@ public class SecurityConfig {
     }
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.httpFirewall(httpFirewall());
+    }
+
+    @Bean
+    public HttpFirewall httpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowSemicolon(true); // Cho phép semicolon trong URL (jsessionid)
+        return firewall;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
+<<<<<<< HEAD
                 .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 // Allow both VENDOR and ADMIN to access vendor pages
@@ -66,6 +86,13 @@ public class SecurityConfig {
                 .requestMatchers("/shipper/**").hasRole("SHIPPER")
                 .requestMatchers("/account/**", "/checkout/**", "/cart/**").authenticated()
                 .anyRequest().permitAll()
+=======
+                .requestMatchers("/", "/login", "/register", "/register/**",
+                                 "/NhanVien/**", // Cho phép truy cập tự do vào NhanVien (sử dụng session riêng)
+                                 "/api/debug/**", // Cho phép truy cập debug API
+                                 "/css/**", "/js/**", "/images/**", "/webjars/**", "/static/**", "/favicon.ico", "/error").permitAll()
+                .anyRequest().authenticated()
+>>>>>>> e66511f5f76c02a6c7a92993afb90a3d8655037c
             )
             .formLogin(form -> form
                 .loginPage("/login")
