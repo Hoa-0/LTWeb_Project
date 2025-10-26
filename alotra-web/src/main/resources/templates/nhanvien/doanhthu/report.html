@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{nhanvien/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Báo cáo doanh thu</title>
+</head>
+<body>
+    <div layout:fragment="content" data-page="doanhthu">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark">
+                <i class="fas fa-chart-line me-2"></i>Báo cáo doanh thu
+            </h2>
+            <div></div>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Từ ngày</label>
+                        <input id="fromDate" type="date" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Đến ngày</label>
+                        <input id="toDate" type="date" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div>
+                            <button id="btnApply" class="btn btn-primary">
+                                <i class="fas fa-chart-bar me-1"></i>Xem báo cáo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Doanh thu (đã thanh toán)</h6>
+                                <h3 id="sumRevenue" class="mb-0">0đ</h3>
+                                <small class="opacity-75">Trong khoảng ngày đã chọn</small>
+                            </div>
+                            <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Đơn hàng</h6>
+                                <h3 id="sumOrders" class="mb-0">0</h3>
+                                <small class="opacity-75">Tổng số đơn trong khoảng</small>
+                            </div>
+                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Giá trị TB/đơn (đã TT)</h6>
+                                <h3 id="avgOrder" class="mb-0">0đ</h3>
+                                <small class="opacity-75">Chỉ tính đơn đã thanh toán</small>
+                            </div>
+                            <i class="fas fa-calculator fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">Đã giao / Đã hủy</h6>
+                                <h3 class="mb-0"><span id="delivered">0</span> / <span id="cancelled">0</span></h3>
+                                <small class="opacity-75">Trong khoảng ngày đã chọn</small>
+                            </div>
+                            <i class="fas fa-clipboard-check fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Revenue Chart -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Biểu đồ doanh thu theo ngày</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Sản phẩm bán chạy</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="topProducts" class="list-group list-group-flush">
+                            <div class="text-muted text-center py-3">Đang tải...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Revenue Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Chi tiết doanh thu theo ngày</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Ngày</th>
+                                <th>Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblRevenueByDay">
+                            <tr><td colspan="2" class="text-center text-muted">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="none" layout:fragment="scripts">
+        function fmtVND(v){try{return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(v||0)}catch(e){return (v||0)+'đ'}}
+        function setDefaultDates(){
+            const to = new Date();
+            const from = new Date(); from.setDate(to.getDate()-6);
+            const fmt = d => d.toISOString().slice(0,10);
+            document.getElementById('fromDate').value = fmt(from);
+            document.getElementById('toDate').value = fmt(to);
+        }
+        async function loadSummary(from,to){
+            const res = await fetch(`/NhanVien/doanhthu/api/summary?from=${from}&to=${to}`);
+            if(!res.ok) return;
+            const s = await res.json();
+            document.getElementById('sumRevenue').textContent = fmtVND(s.revenuePaid);
+            document.getElementById('sumOrders').textContent = s.totalOrders ?? 0;
+            document.getElementById('avgOrder').textContent = fmtVND(s.avgPaidOrderValue);
+            document.getElementById('delivered').textContent = s.deliveredOrders ?? 0;
+            document.getElementById('cancelled').textContent = s.cancelledOrders ?? 0;
+        }
+        let chart;
+        async function loadRevenueChart(from,to){
+            const res = await fetch(`/NhanVien/doanhthu/api/revenue-by-day?from=${from}&to=${to}`);
+            if(!res.ok) return;
+            const series = await res.json();
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            if(chart) { chart.destroy(); }
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: series.labels || [],
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: series.data || [],
+                        borderColor: '#4bc0c0',
+                        backgroundColor: 'rgba(75,192,192,0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return fmtVND(value); }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+            // Fill table
+            const tbody = document.getElementById('tblRevenueByDay');
+            tbody.innerHTML = '';
+            (series.labels||[]).forEach((label, idx)=>{
+                const val = series.data[idx]||0;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${label}</td><td>${fmtVND(val)}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+        async function loadTopProducts(from,to){
+            const res = await fetch(`/NhanVien/doanhthu/api/top-products?from=${from}&to=${to}&limit=5`);
+            const container = document.getElementById('topProducts');
+            if(!res.ok){ container.innerHTML = '<div class="text-muted text-center py-3">Không tải được dữ liệu</div>'; return; }
+            const list = await res.json();
+            if(!list.length){ container.innerHTML = '<div class="text-muted text-center py-3">Chưa có dữ liệu</div>'; return; }
+            container.innerHTML = '';
+            list.forEach(p=>{
+                const item = document.createElement('div');
+                item.className = 'list-group-item d-flex justify-content-between align-items-center px-0';
+                item.innerHTML = `<div><h6 class="mb-0">${p.tenSP}</h6><small class="text-muted">${p.sales} ly</small></div><span class="badge bg-primary">${fmtVND(p.revenue)}</span>`;
+                container.appendChild(item);
+            });
+        }
+        async function apply(){
+            const from = document.getElementById('fromDate').value;
+            const to = document.getElementById('toDate').value;
+            if(!from||!to) return;
+            await Promise.all([loadSummary(from,to), loadRevenueChart(from,to), loadTopProducts(from,to)]);
+        }
+        document.addEventListener('DOMContentLoaded',()=>{
+            setDefaultDates();
+            document.getElementById('btnApply').addEventListener('click', apply);
+            apply();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{nhanvien/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết khuyến mãi</title>
+</head>
+<body>
+    <div layout:fragment="content" data-page="khuyenmai">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark">
+                <i class="fas fa-tag me-2"></i>Chi tiết khuyến mãi
+            </h2>
+            <div>
+                <a th:href="@{'/NhanVien/khuyenmai/sua/' + ${suKien.maKM}}" class="btn btn-warning">
+                    <i class="fas fa-edit me-1"></i>Chỉnh sửa
+                </a>
+                <a href="/NhanVien/khuyenmai" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Basic Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thông tin khuyến mãi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Mã khuyến mãi:</strong> <span th:text="${suKien.maKM}">1</span></p>
+                                <p><strong>Tên khuyến mãi:</strong> <span th:text="${suKien.tenSuKien}">Tên</span></p>
+                                <p><strong>Trạng thái:</strong>
+                                    <span class="badge" th:classappend="${suKien.expired} ? ' bg-danger' : (${suKien.activeNow} ? ' bg-success' : ' bg-secondary')"
+                                          th:text="${suKien.expired} ? 'Hết hạn' : (${suKien.activeNow} ? 'Hoạt động' : 'Tạm ngưng')">Trạng thái</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Hình thức:</strong> Giảm theo sản phẩm</p>
+                                <p><strong>Số sản phẩm áp dụng:</strong> <span th:text="${#lists.size(dsSanPham)}">0</span></p>
+                                <p><strong>Lượt xem:</strong> <span th:text="${suKien.luotXem}">0</span></p>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <p><strong>Mô tả:</strong></p>
+                            <p class="text-muted" th:text="${suKien.moTa}">Mô tả</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh sách sản phẩm áp dụng -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Sản phẩm áp dụng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mã SP</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Giảm (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p : ${dsSanPham}">
+                                        <td th:text="${p.maSP}">1</td>
+                                        <td th:text="${p.sanPham != null ? p.sanPham.tenSP : 'N/A'}">Tên SP</td>
+                                        <td th:text="${p.phanTramGiam}">0</td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(dsSanPham)}">
+                                        <td colspan="3" class="text-center text-muted">Chưa có sản phẩm áp dụng</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Usage -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Lịch sử sử dụng gần đây</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Mã đơn hàng</th>
+                                        <th>Khách hàng</th>
+                                        <th>Giá trị đơn</th>
+                                        <th>Giảm giá</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>15/01/2024 14:30</td>
+                                        <td>#DH156</td>
+                                        <td>Nguyễn Văn A</td>
+                                        <td>250,000đ</td>
+                                        <td>50,000đ</td>
+                                    </tr>
+                                    <tr>
+                                        <td>15/01/2024 13:45</td>
+                                        <td>#DH155</td>
+                                        <td>Trần Thị B</td>
+                                        <td>320,000đ</td>
+                                        <td>64,000đ</td>
+                                    </tr>
+                                    <tr>
+                                        <td>15/01/2024 11:20</td>
+                                        <td>#DH154</td>
+                                        <td>Lê Văn C</td>
+                                        <td>180,000đ</td>
+                                        <td>0đ</td>
+                                    </tr>
+                                    <tr>
+                                        <td>14/01/2024 16:15</td>
+                                        <td>#DH153</td>
+                                        <td>Phạm Thị D</td>
+                                        <td>500,000đ</td>
+                                        <td>100,000đ</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Time Settings -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thời gian áp dụng</h5>
+                    </div>
+                    <div class="card-body">
+                                <p><strong>Bắt đầu:</strong><br><span th:text="${#temporals.format(suKien.ngayBD, 'dd/MM/yyyy')}">01/01/2024</span></p>
+                                <p><strong>Kết thúc:</strong><br><span th:text="${#temporals.format(suKien.ngayKT, 'dd/MM/yyyy')}">31/12/2024</span></p>
+                        <p><strong>Thời gian còn lại:</strong><br>
+                                    <span th:if="${suKien.expired}" class="text-danger">Đã hết hạn</span>
+                                    <span th:if="${!suKien.expired}" class="text-success">Đang hiệu lực</span></p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thao tác</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a th:href="@{'/NhanVien/khuyenmai/sua/' + ${suKien.maKM}}" class="btn btn-warning">
+                                <i class="fas fa-edit me-1"></i>Chỉnh sửa
+                            </a>
+                            <form th:action="@{'/NhanVien/khuyenmai/xoa/' + ${suKien.maKM}}" method="post" onsubmit="return confirm('Xóa khuyến mãi này?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button class="btn btn-danger" type="submit">
+                                    <i class="fas fa-trash me-1"></i>Xóa khuyến mãi
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
