@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="nhanvien/layout :: layout(~{::content})">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{nhanvien/layout}">
 <head>
     <meta charset="UTF-8">
     <title th:text="${isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}">Thêm sản phẩm</title>
 </head>
 <body>
-    <div th:fragment="content">
+    <div layout:fragment="content">
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}">Thành công</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">Có lỗi xảy ra</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <!-- Page Header -->
         <div class="page-header">
             <h1 class="page-title" th:text="${isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}">Thêm sản phẩm mới</h1>
@@ -30,10 +39,11 @@
                         <h5 class="card-title">Thông tin sản phẩm</h5>
                     </div>
                     <div class="card-body">
-                        <form th:action="${isEdit ? '/NhanVien/san-pham/sua/' + sanPhamDTO.maSP : '/NhanVien/san-pham/them'}" 
-                              th:object="${sanPhamDTO}" 
-                              method="post" 
-                              enctype="multipart/form-data">
+                <form id="productForm"
+                    th:action="${isEdit ? '/NhanVien/san-pham/sua/' + sanPhamDTO.maSP : '/NhanVien/san-pham/them'}" 
+                    th:object="${sanPhamDTO}" 
+                    method="post" 
+                    enctype="multipart/form-data">
                             
                             <!-- Tên sản phẩm -->
                             <div class="mb-3">
@@ -158,26 +168,32 @@
                         <h5 class="card-title">Biến thể sản phẩm</h5>
                     </div>
                     <div class="card-body">
+                        <!-- Hiển thị lỗi biến thể -->
+                        <div th:if="${variantError}" class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span th:text="${variantError}">Vui lòng thêm ít nhất một biến thể hợp lệ.</span>
+                        </div>
                         <div id="variantsContainer">
                             <!-- Biến thể hiện có (nếu đang sửa) -->
                             <div th:if="${isEdit and sanPhamDTO.bienThes != null and !sanPhamDTO.bienThes.isEmpty()}">
                                 <div th:each="bt, iterStat : ${sanPhamDTO.bienThes}" class="variant-item border rounded p-3 mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h6 class="mb-0">Size <span th:text="${bt.tenSize}">M</span></h6>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeVariant(this)">
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-variant" onclick="removeVariant(this)">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
                                     
-                                    <input type="hidden" th:name="${'bienThes[' + iterStat.index + '].maBT'}" th:value="${bt.maBT}">
-                                    <input type="hidden" th:name="${'bienThes[' + iterStat.index + '].maSize'}" th:value="${bt.maSize}">
-                                    <input type="hidden" th:name="${'bienThes[' + iterStat.index + '].tenSize'}" th:value="${bt.tenSize}">
+                                    <input type="hidden" form="productForm" th:name="${'bienThes[' + iterStat.index + '].maBT'}" th:value="${bt.maBT}">
+                                    <input type="hidden" form="productForm" th:name="${'bienThes[' + iterStat.index + '].maSize'}" th:value="${bt.maSize}">
+                                    <input type="hidden" form="productForm" th:name="${'bienThes[' + iterStat.index + '].tenSize'}" th:value="${bt.tenSize}">
                                     
                                     <div class="mb-2">
                                         <label class="form-label">Giá bán (VNĐ)</label>
-                                        <input type="number" 
-                                               class="form-control" 
-                                               th:name="${'bienThes[' + iterStat.index + '].giaBan'}"
+                         <input type="number" 
+                             class="form-control" 
+                             form="productForm"
+                             th:name="${'bienThes[' + iterStat.index + '].giaBan'}"
                                                th:value="${bt.giaBan}"
                                                step="1000" 
                                                min="0" 
@@ -185,9 +201,10 @@
                                     </div>
                                     
                                     <div class="form-check">
-                                        <input class="form-check-input" 
-                                               type="checkbox" 
-                                               th:name="${'bienThes[' + iterStat.index + '].trangThai'}"
+                         <input class="form-check-input" 
+                             type="checkbox" 
+                             form="productForm"
+                             th:name="${'bienThes[' + iterStat.index + '].trangThai'}"
                                                th:checked="${bt.trangThai == 1}"
                                                value="1">
                                         <label class="form-check-label">Đang bán</label>
@@ -196,9 +213,53 @@
                             </div>
                         </div>
 
-                        <button type="button" class="btn btn-outline-primary w-100" onclick="addVariant()">
+                        <button type="button" id="btnAddVariant" class="btn btn-outline-primary w-100">
                             <i class="fas fa-plus me-2"></i>Thêm biến thể
                         </button>
+                        <div id="variantDebugMsg" class="small text-muted mt-2"></div>
+                        <button type="button" id="btnConfirmVariants" class="btn btn-secondary w-100 mt-2">
+                            <i class="fas fa-check me-2"></i>Xác nhận biến thể
+                        </button>
+                        <!-- Variant Template (hidden) moved inside fragment to ensure availability -->
+                        <!-- Important: inputs in this template are disabled and have NO form attribute to avoid accidental submission -->
+                        <div id="variantTemplate" class="d-none mt-2">
+                            <div class="variant-item border rounded p-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Biến thể mới</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-variant">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label">Size</label>
+                                    <select class="form-select" name="bienThes[__INDEX__].maSize" disabled data-template="true">
+                                        <option value="">-- Chọn size --</option>
+                                        <option th:each="size : ${sizes}" th:value="${size.maSize}" th:text="${size.tenSize}"></option>
+                                    </select>
+                                    <input type="hidden" name="bienThes[__INDEX__].tenSize" disabled data-template="true">
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label">Giá bán (VNĐ)</label>
+                    <input type="number"
+                        class="form-control"
+                        name="bienThes[__INDEX__].giaBan" disabled data-template="true"
+                                           step="1000"
+                                           min="0"
+                                           placeholder="0">
+                                </div>
+
+                                <div class="form-check">
+                    <input class="form-check-input"
+                        type="checkbox"
+                        name="bienThes[__INDEX__].trangThai" disabled data-template="true"
+                                           value="1"
+                                           checked>
+                                    <label class="form-check-label">Đang bán</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -218,11 +279,21 @@
         </div>
     </div>
 
+    
+
     <script>
+        // Polyfill cho replaceAll nếu thiếu
+        if (typeof String.prototype.replaceAll !== 'function') {
+            // eslint-disable-next-line no-extend-native
+            String.prototype.replaceAll = function(search, replacement) {
+                return this.split(search).join(replacement);
+            };
+        }
+
         let variantIndex = 0;
         
         // Preview ảnh được chọn
-        function previewImage(input) {
+        window.previewImage = function(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -237,61 +308,56 @@
                 };
                 reader.readAsDataURL(input.files[0]);
             }
-        }
+    };
         
         // Thêm biến thể mới
-        function addVariant() {
-            const container = document.getElementById('variantsContainer');
-            const variantHtml = `
-                <div class="variant-item border rounded p-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">Biến thể mới</h6>
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeVariant(this)">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="mb-2">
-                        <label class="form-label">Size</label>
-                        <select class="form-select" name="bienThes[${variantIndex}].maSize" onchange="updateSizeName(this, ${variantIndex})">
-                            <option value="">-- Chọn size --</option>
-                            <option th:each="size : ${sizes}" th:value="${size.maSize}" th:text="${size.tenSize}"></option>
-                        </select>
-                        <input type="hidden" name="bienThes[${variantIndex}].tenSize">
-                    </div>
-                    
-                    <div class="mb-2">
-                        <label class="form-label">Giá bán (VNĐ)</label>
-                        <input type="number" 
-                               class="form-control" 
-                               name="bienThes[${variantIndex}].giaBan"
-                               step="1000" 
-                               min="0" 
-                               placeholder="0">
-                    </div>
-                    
-                    <div class="form-check">
-                        <input class="form-check-input" 
-                               type="checkbox" 
-                               name="bienThes[${variantIndex}].trangThai"
-                               value="1" 
-                               checked>
-                        <label class="form-check-label">Đang bán</label>
-                    </div>
-                </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', variantHtml);
-            variantIndex++;
-        }
+        window.addVariant = function() {
+            try {
+                const tpl = document.querySelector('#variantTemplate .variant-item');
+                if (!tpl) {
+                    console.error('Không tìm thấy template biến thể (#variantTemplate)');
+                    const dbg = document.getElementById('variantDebugMsg');
+                    if (dbg) {
+                        dbg.textContent = 'Không tìm thấy mẫu biến thể (#variantTemplate). Hãy tải lại trang.';
+                        dbg.classList.remove('text-muted');
+                        dbg.classList.add('text-danger');
+                    }
+                    alert('Không tìm thấy mẫu biến thể. Vui lòng tải lại trang.');
+                    return;
+                }
+                const templateItem = tpl.cloneNode(true);
+                let html = templateItem.innerHTML;
+                html = html.replaceAll('__INDEX__', variantIndex);
+                templateItem.innerHTML = html;
+
+                document.getElementById('variantsContainer').appendChild(templateItem);
+                console.debug('Đã thêm biến thể, index =', variantIndex);
+                const dbgOk = document.getElementById('variantDebugMsg');
+                if (dbgOk) {
+                    dbgOk.textContent = `Đã thêm biến thể, index = ${variantIndex}`;
+                    dbgOk.classList.remove('text-danger');
+                    dbgOk.classList.add('text-success');
+                }
+                variantIndex++;
+            } catch (e) {
+                console.error('Lỗi khi thêm biến thể:', e);
+                const dbgErr = document.getElementById('variantDebugMsg');
+                if (dbgErr) {
+                    dbgErr.textContent = `Lỗi khi thêm biến thể: ${e && e.message ? e.message : e}`;
+                    dbgErr.classList.remove('text-muted');
+                    dbgErr.classList.add('text-danger');
+                }
+                alert('Không thể thêm biến thể. Vui lòng thử lại.');
+            }
+        };
         
         // Xóa biến thể
-        function removeVariant(button) {
+        window.removeVariant = function(button) {
             button.closest('.variant-item').remove();
-        }
+        };
         
         // Cập nhật tên size
-        function updateSizeName(selectElement, index) {
+        window.updateSizeName = function(selectElement, index) {
             const selectedOption = selectElement.options[selectElement.selectedIndex];
             const hiddenInput = selectElement.parentNode.querySelector('input[type="hidden"]');
             hiddenInput.value = selectedOption.text;
@@ -299,13 +365,90 @@
             // Cập nhật tiêu đề
             const title = selectElement.closest('.variant-item').querySelector('h6');
             title.textContent = selectedOption.text ? `Size ${selectedOption.text}` : 'Biến thể mới';
-        }
+        };
         
         // Khởi tạo index cho các biến thể hiện có
         document.addEventListener('DOMContentLoaded', function() {
-            const existingVariants = document.querySelectorAll('.variant-item');
+            const existingVariants = document.querySelectorAll('#variantsContainer .variant-item');
             variantIndex = existingVariants.length;
+            const btn = document.getElementById('btnAddVariant');
+            if (btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    addVariant();
+                });
+                const dbgBind = document.getElementById('variantDebugMsg');
+                if (dbgBind) {
+                    dbgBind.textContent = 'Đã gắn sự kiện cho nút Thêm biến thể';
+                }
+            }
+
+            const btnConfirm = document.getElementById('btnConfirmVariants');
+            if (btnConfirm) {
+                btnConfirm.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    validateVariants(true);
+                });
+            }
+
+            // Validate on submit
+            const productForm = document.getElementById('productForm');
+            if (productForm) {
+                productForm.addEventListener('submit', function(e) {
+                    const ok = validateVariants(false);
+                    if (!ok) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            }
         });
+
+        // Validate variants: require at least one with size and price > 0; prevent duplicate sizes
+        function validateVariants(showToast) {
+            const dbg = document.getElementById('variantDebugMsg');
+            const items = document.querySelectorAll('#variantsContainer .variant-item');
+            let validCount = 0;
+            const usedSizes = new Set();
+            let hasDuplicate = false;
+
+            // Clear old invalid states
+            document.querySelectorAll('#variantsContainer .is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+            items.forEach(item => {
+                const select = item.querySelector('select[name^="bienThes"][name$= ".maSize"]');
+                const hiddenSize = item.querySelector('input[type="hidden"][name^="bienThes"][name$= ".maSize"]');
+                const priceInput = item.querySelector('input[name^="bienThes"][name$=".giaBan"]');
+                let ok = true;
+
+                const sizeVal = select ? select.value : (hiddenSize ? hiddenSize.value : '');
+                const priceVal = priceInput ? parseFloat(priceInput.value) : NaN;
+
+                if (!sizeVal) { ok = false; if (select) select.classList.add('is-invalid'); }
+                if (!(priceVal > 0)) { ok = false; if (priceInput) priceInput.classList.add('is-invalid'); }
+                if (ok) {
+                    if (usedSizes.has(sizeVal)) { hasDuplicate = true; ok = false; if (select) select.classList.add('is-invalid'); }
+                    else usedSizes.add(sizeVal);
+                }
+                if (ok) validCount++;
+            });
+
+            if (items.length === 0) {
+                if (dbg) { dbg.textContent = 'Vui lòng thêm ít nhất một biến thể hợp lệ (có Size và Giá bán).'; dbg.classList.add('text-danger'); dbg.classList.remove('text-success'); dbg.scrollIntoView({behavior:'smooth', block:'center'}); }
+                return false;
+            }
+            if (hasDuplicate) {
+                if (dbg) { dbg.textContent = 'Không được chọn trùng Size giữa các biến thể.'; dbg.classList.add('text-danger'); dbg.classList.remove('text-success'); dbg.scrollIntoView({behavior:'smooth', block:'center'}); }
+                return false;
+            }
+            if (validCount === 0) {
+                if (dbg) { dbg.textContent = 'Vui lòng điền Size và Giá bán > 0 cho ít nhất một biến thể.'; dbg.classList.add('text-danger'); dbg.classList.remove('text-success'); dbg.scrollIntoView({behavior:'smooth', block:'center'}); }
+                return false;
+            }
+
+            if (dbg) { dbg.textContent = 'Các biến thể hợp lệ.'; dbg.classList.remove('text-danger'); dbg.classList.add('text-success'); if (showToast) dbg.scrollIntoView({behavior:'smooth', block:'center'}); }
+            return true;
+        }
     </script>
 </body>
 </html>

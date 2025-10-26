@@ -8,6 +8,15 @@
 </head>
 <body>
     <div layout:fragment="content">
+        <!-- Alerts -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}">Thành công</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}">Có lỗi xảy ra</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <!-- Page Header -->
         <div class="page-header d-flex justify-content-between align-items-center">
             <div>
@@ -170,11 +179,6 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a th:href="@{/NhanVien/san-pham/xem/{maSP}(maSP=${sp.maSP})}" 
-                                           class="btn btn-sm btn-outline-info" 
-                                           title="Xem chi tiết">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
                                         <a th:href="@{/NhanVien/san-pham/sua/{maSP}(maSP=${sp.maSP})}" 
                                            class="btn btn-sm btn-outline-warning" 
                                            title="Sửa">

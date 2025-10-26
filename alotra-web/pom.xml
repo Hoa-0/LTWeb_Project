@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.6</version>
+    <version>3.5.7</version>
         <relativePath/>
     </parent>
 
@@ -22,6 +22,12 @@
     </properties>
 
     <dependencies>
+        <!-- Cloudinary Java SDK for image uploads -->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http44</artifactId>
+            <version>1.39.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.webjars</groupId>

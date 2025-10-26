@@ -83,16 +83,24 @@ public class DonHangController {
 
         model.addAttribute("pageTitle", "Quản lý đơn hàng");
         model.addAttribute("orders", pageData);
-    model.addAttribute("from", from);
-    model.addAttribute("to", to);
+        model.addAttribute("from", from);
+        model.addAttribute("to", to);
         model.addAttribute("trangThai", trangThai);
         model.addAttribute("paymentStatus", paymentStatus);
 
-        // Simple stats for the current filter range
-        model.addAttribute("statsTotal", pageData.getTotalElements());
-        model.addAttribute("statsDelivered", pageData.getContent().stream().filter(d -> "DaGiao".equalsIgnoreCase(d.getTrangThaiDonHang())).count());
-        model.addAttribute("statsProcessing", pageData.getContent().stream().filter(d -> Objects.equals("DangXuLy", d.getTrangThaiDonHang()) || Objects.equals("ChoXuLy", d.getTrangThaiDonHang())).count());
-        model.addAttribute("statsCancelled", pageData.getContent().stream().filter(d -> Objects.equals("DaHuy", d.getTrangThaiDonHang())).count());
+        // Accurate stats across the WHOLE filtered dataset (not just current page)
+        long total = donHangRepository.count(spec);
+        // Delivered and Cancelled resolved via OrderStatusResolver (keeps DB casing)
+        String deliveredVal = statusResolver.resolveDeliveredStatus();
+        String cancelledVal = statusResolver.resolveCancelledStatus();
+        long delivered = donHangRepository.count(spec.and((root, q, cb2) -> cb2.equal(root.get("trangThaiDonHang"), deliveredVal)));
+        long cancelled = donHangRepository.count(spec.and((root, q, cb2) -> cb2.equal(root.get("trangThaiDonHang"), cancelledVal)));
+        long processing = Math.max(0, total - delivered - cancelled);
+
+        model.addAttribute("statsTotal", total);
+        model.addAttribute("statsDelivered", delivered);
+        model.addAttribute("statsProcessing", processing);
+        model.addAttribute("statsCancelled", cancelled);
 
         return "nhanvien/donhang/list";
     }
