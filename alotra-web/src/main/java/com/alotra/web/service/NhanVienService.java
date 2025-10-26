@@ -5,14 +5,13 @@ import com.alotra.web.repository.NhanVienRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
-@Transactional(readOnly = true)
 public class NhanVienService {
     
     private final NhanVienRepository nhanVienRepository;
@@ -50,49 +49,56 @@ public class NhanVienService {
                 log.info("Authentication successful for employee: {}", usernameOrEmail);
                 return Optional.of(nhanVien);
             } else {
-                log.warn("Invalid password for employee: {}. Expected: '{}', Got: '{}'", 
-                    usernameOrEmail, nhanVien.getMatKhauHash(), rawPassword);
-                return Optional.empty();
+                // Preserve current hash from DB when not changing password
+                NhanVien current = repo.findById(nv.getId()).orElseThrow();
+                nv.setPasswordHash(current.getPasswordHash());
             }
-            
-        } catch (Exception e) {
-            log.error("Error during authentication for employee: {}", usernameOrEmail, e);
-            return Optional.empty();
         }
+        return repo.save(nv);
     }
-    
-    /**
-     * Tìm nhân viên theo username
-     */
-    public Optional<NhanVien> findByUsername(String username) {
-        return nhanVienRepository.findByUsernameIgnoreCase(username);
+
+    public void deleteById(Integer id) { repo.deleteById(id); }
+
+    public NhanVien findByUsername(String u){ return repo.findByUsername(u);}    
+    public NhanVien findByEmail(String e){ return repo.findByEmail(e);}    
+    public NhanVien findByPhone(String p){ return repo.findByPhone(p);}   
+
+    // Search with optional filters
+    public List<NhanVien> search(String kw, Integer role, Integer status) {
+        if (kw != null && kw.isBlank()) kw = null;
+        return repo.search(kw, role, status);
     }
-    
-    /**
-     * Tìm nhân viên theo email
-     */
-    public Optional<NhanVien> findByEmail(String email) {
-        return nhanVienRepository.findByEmailIgnoreCase(email);
+
+    // Reset password to a random temporary one; returns plaintext temp password
+    public String resetPassword(Integer id) {
+        NhanVien nv = repo.findById(id).orElseThrow();
+        String temp = generateTempPassword(10);
+        nv.setPasswordHash(encoder.encode(temp));
+        repo.save(nv);
+        return temp;
     }
-    
-    /**
-     * Tìm nhân viên theo ID
-     */
-    public Optional<NhanVien> findById(Integer id) {
-        return nhanVienRepository.findById(id);
+
+    private String generateTempPassword(int len) {
+        final String dict = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$%"; // avoid confusing chars
+        SecureRandom r = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) sb.append(dict.charAt(r.nextInt(dict.length())));
+        return sb.toString();
     }
-    
-    /**
-     * Kiểm tra username đã tồn tại chưa
-     */
-    public boolean existsByUsername(String username) {
-        return nhanVienRepository.existsByUsernameIgnoreCase(username);
+
+    // Soft delete to trash: mark DeletedAt and lock account
+    public void softDeleteToTrash(Integer id) {
+        repo.findById(id).ifPresent(nv -> {
+            nv.setDeletedAt(LocalDateTime.now());
+            nv.setStatus(0);
+            repo.save(nv);
+        });
     }
-    
-    /**
-     * Kiểm tra email đã tồn tại chưa
-     */
-    public boolean existsByEmail(String email) {
-        return nhanVienRepository.existsByEmailIgnoreCase(email);
+
+    public void restoreFromTrash(Integer id) {
+        repo.findById(id).ifPresent(nv -> {
+            nv.setDeletedAt(null);
+            repo.save(nv);
+        });
     }
 }
