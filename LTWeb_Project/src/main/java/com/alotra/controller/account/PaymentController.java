@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 @Controller
 @RequestMapping("/payment")
 public class PaymentController {
-    @org.springframework.beans.factory.annotation.Value("${payment.settle.bank-code:MSB}")
+    @org.springframework.beans.factory.annotation.Value("${payment.settle.bank-code:VCB}}")
     private String BANK_CODE;
     @org.springframework.beans.factory.annotation.Value("${payment.settle.account}")
     private String ACCOUNT_NUMBER;

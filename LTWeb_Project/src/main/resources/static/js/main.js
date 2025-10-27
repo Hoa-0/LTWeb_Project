@@ -13,6 +13,61 @@ $(document).ready(function() {
     function api(url) { return ctx + url.replace(/^\//, ''); }
 
     // ===================================================================
+    // SIDEBAR NAVIGATION
+    // ===================================================================
+    const $sidebar = $('#mainSidebar');
+    const $overlay = $('#sidebarOverlay');
+    const $toggleBtn = $('#sidebarToggle');
+    const $closeBtn = $('#sidebarClose');
+
+    function openSidebar() {
+        if ($sidebar.length) {
+            $sidebar.addClass('active');
+            if ($overlay.length) $overlay.addClass('active');
+            $('body').css('overflow', 'hidden');
+        }
+    }
+
+    function closeSidebar() {
+        if ($sidebar.length) {
+            $sidebar.removeClass('active');
+            if ($overlay.length) $overlay.removeClass('active');
+            $('body').css('overflow', '');
+        }
+    }
+
+    // Toggle button click
+    if ($toggleBtn.length) {
+        $toggleBtn.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openSidebar();
+        });
+    }
+
+    // Close button click
+    if ($closeBtn.length) {
+        $closeBtn.on('click', function(e) {
+            e.preventDefault();
+            closeSidebar();
+        });
+    }
+
+    // Overlay click
+    if ($overlay.length) {
+        $overlay.on('click', function() {
+            closeSidebar();
+        });
+    }
+
+    // ESC key to close
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape' && $sidebar.hasClass('active')) {
+            closeSidebar();
+        }
+    });
+
+    // ===================================================================
     // VIEW MORE buttons
     // ===================================================================
     const productContainer = $("#product-list-container");
@@ -131,69 +186,16 @@ $(document).ready(function() {
     }
 
     // ===================================================================
-    // SEARCH TYPEAHEAD
+    // SEARCH TYPEAHEAD - DISABLED
     // ===================================================================
     const $searchInput = $('#siteSearchInput');
     const $searchForm = $('#siteSearchForm');
     const $suggest = $('#siteSearchSuggest');
-    let searchTimer = null;
-    let lastQuery = '';
-
-    function hideSuggest(){ $suggest.hide().empty(); }
-
-    function renderSuggest(data){
-        const products = data && Array.isArray(data.products) ? data.products : [];
-        const categories = data && Array.isArray(data.categories) ? data.categories : [];
-        const keywords = data && Array.isArray(data.keywords) ? data.keywords : [];
-        let html = '';
-        if (keywords.length) {
-            html += '<div class="p-2 border-bottom"><div class="small text-muted mb-1">Gợi ý nhanh</div>';
-            html += keywords.map(k => `<a class="btn btn-sm btn-outline-success me-1 mb-1 search-chip" href="${api('search?q=' + encodeURIComponent(k))}">${k}</a>`).join('');
-            html += '</div>';
-        }
-        if (categories.length) {
-            html += '<div class="p-2 border-bottom"><div class="small text-muted mb-1">Danh mục</div>';
-            html += categories.map(c => `<a class="list-group-item list-group-item-action" href="${api('products?categoryId=' + encodeURIComponent(c.id))}"><i class="fa fa-folder-open me-2 text-success"></i>${c.name||''}</a>`).join('');
-            html += '</div>';
-        }
-        if (products.length) {
-            html += '<div class="list-group list-group-flush">';
-            html += products.map(p => `
-                <a class="list-group-item list-group-item-action d-flex align-items-center" href="${api('products/' + p.id)}">
-                    <img src="${p.imageUrl || '/images/placeholder.png'}" alt="thumb" style="width:42px;height:42px;object-fit:cover;border-radius:6px;" class="me-2" />
-                    <div class="flex-grow-1">
-                        <div class="fw-semibold">${p.name||''}</div>
-                        <div class="small text-success">${(p.price||0).toLocaleString('vi-VN')} ₫</div>
-                    </div>
-                </a>`).join('');
-            html += '</div>';
-        }
-        if (!html) {
-            html = '<div class="p-3 text-center text-muted">Không có gợi ý.</div>';
-        }
-        $suggest.html(html).show();
-    }
-
-    function fetchSuggest(q){
-        $.ajax({ url: api('api/search/suggest'), data: { q: q||'' }, success: renderSuggest, error: function(){ hideSuggest(); } });
-    }
-
-    if ($searchInput.length && $suggest.length) {
-        $searchInput.on('input', function(){
-            const q = $(this).val() || '';
-            if (q === lastQuery && $suggest.is(':visible')) return;
-            lastQuery = q;
-            clearTimeout(searchTimer);
-            searchTimer = setTimeout(function(){ fetchSuggest(q); }, 200);
-        });
-        $searchInput.on('focus', function(){
-            if (lastQuery === '' && !$suggest.is(':visible')) { fetchSuggest(''); } else { $suggest.show(); }
-        });
-        $(document).on('click', function(e){ if (!$(e.target).closest('#siteSearchForm').length) hideSuggest(); });
-        // basic keyboard: enter submits form
-        $searchInput.on('keydown', function(e){ if (e.key === 'Escape') { hideSuggest(); } });
-        // Submit form navigates to /search?q=...
-        $searchForm.on('submit', function(){ hideSuggest(); });
+    
+    // Autocomplete/suggestion feature disabled
+    // Search only works when user submits the form
+    if ($suggest.length) {
+        $suggest.hide().remove();
     }
 
     // ===================================================================
