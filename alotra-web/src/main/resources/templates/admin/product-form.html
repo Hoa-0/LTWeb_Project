@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="${pageTitle ?: 'Quản lý Sản phẩm'}"></title>
+    <style>
+        .product-image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 8px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <th:block layout:fragment="page_title">
+        <span th:text="${pageTitle ?: 'Quản lý Sản phẩm'}"></span>
+    </th:block>
+
+    <div layout:fragment="content">
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> <span th:text="${errorMessage}">Nội dung lỗi sẽ hiển thị ở đây.</span> <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> </div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary" th:text="${pageTitle ?: 'Thông tin Sản phẩm'}"></h6>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/products/save}" th:object="${sanPham}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" th:field="*{maSP}"/>
+                    <input type="hidden" th:field="*{trangThai}"/>
+                    <input type="hidden" th:field="*{deletedAt}"/>
+
+                    <div class="mb-3 row">
+                        <label for="tenSP" class="col-sm-3 col-form-label">Tên Sản phẩm <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="tenSP" th:field="*{tenSP}" required maxlength="255"
+                                   th:classappend="${#fields.hasErrors('tenSP')} ? 'is-invalid'">
+                            <div th:if="${#fields.hasErrors('tenSP')}" class="invalid-feedback" th:errors="*{tenSP}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="maDM" class="col-sm-3 col-form-label">Danh mục <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <select class="form-select" id="maDM" th:field="*{maDM}" required
+                                    th:classappend="${#fields.hasErrors('maDM')} ? 'is-invalid'">
+                                <option value="">-- Chọn Danh mục --</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.maDM}"
+                                        th:text="${cat.tenDM}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('maDM')}" class="invalid-feedback" th:errors="*{maDM}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="moTa" class="col-sm-3 col-form-label">Mô tả</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" id="moTa" th:field="*{moTa}" rows="3" maxlength="255"
+                                      th:classappend="${#fields.hasErrors('moTa')} ? 'is-invalid'"></textarea>
+                             <div th:if="${#fields.hasErrors('moTa')}" class="invalid-feedback" th:errors="*{moTa}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="urlAnh" class="col-sm-3 col-form-label">URL Ảnh <span th:if="*{maSP == null}" class="text-danger">*</span></label> <div class="col-sm-9">
+                            <input type="url" class="form-control" id="urlAnh" th:field="*{urlAnh}" placeholder="https://..."
+                                   th:classappend="${#fields.hasErrors('urlAnh')} ? 'is-invalid'"
+                                   oninput="previewImage(this.value)">
+                             <div th:if="${#fields.hasErrors('urlAnh')}" class="invalid-feedback" th:errors="*{urlAnh}"></div>
+                             <img id="imagePreview" src="#" alt="Xem trước ảnh" class="product-image-preview mt-2" style="display: none;"/>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-sm-9 offset-sm-3">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-save me-1"></i> Lưu Sản phẩm
+                            </button>
+                            <a th:href="@{/admin/products}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            // Hàm xem trước ảnh
+            function previewImage(url) {
+                const imgPreview = document.getElementById('imagePreview');
+                if (url && url.trim() !== '') {
+                    imgPreview.src = url;
+                    imgPreview.style.display = 'block';
+                    imgPreview.onerror = function() { // Ẩn nếu URL lỗi
+                        imgPreview.style.display = 'none';
+                    };
+                } else {
+                    imgPreview.style.display = 'none';
+                }
+            }
+            // Gọi xem trước khi load trang (cho form Sửa)
+            document.addEventListener('DOMContentLoaded', (event) => {
+                 const imageUrlInput = document.getElementById('urlAnh');
+                 if(imageUrlInput && imageUrlInput.value) {
+                    previewImage(imageUrlInput.value);
+                 }
+                 // Tự động tắt thông báo lỗi sau 5 giây (nếu có)
+                 setTimeout(function() {
+                     const errorAlert = document.querySelector('.alert-danger');
+                     if (errorAlert) {
+                         bootstrap.Alert.getOrCreateInstance(errorAlert).close();
+                     }
+                 }, 5000);
+            });
+        </script>
+    </th:block>
+
+</body>
+</html>

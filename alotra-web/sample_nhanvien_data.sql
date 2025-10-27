@@ -4,13 +4,16 @@
 INSERT INTO NhanVien (Username, MatKhauHash, Email, TenNV, VaiTro, SoDienThoai, TrangThai, AnhDaiDien, DeletedAt)
 VALUES ('admin', '123456', 'admin@alotra.com', N'Nguyễn Văn Admin', 1, '0123456789', 1, NULL, NULL);
 
+INSERT INTO NhanVien (Username, MatKhauHash, Email, TenNV, VaiTro, SoDienThoai, TrangThai, AnhDaiDien, DeletedAt)
+VALUES ('ad', '123456', 'ad@alotra.com', N' Lê Admin', 1, '0123456777', 1, NULL, NULL);
+
 -- Thêm nhân viên Manager
 INSERT INTO NhanVien (Username, MatKhauHash, Email, TenNV, VaiTro, SoDienThoai, TrangThai, AnhDaiDien, DeletedAt)
 VALUES ('manager', '123456', 'manager@alotra.com', N'Trần Thị Manager', 2, '0987654321', 1, NULL, NULL);
 
 -- Thêm nhân viên Staff
 INSERT INTO NhanVien (Username, MatKhauHash, Email, TenNV, VaiTro, SoDienThoai, TrangThai, AnhDaiDien, DeletedAt)
-VALUES ('staff', '123456', 'staff@alotra.com', N'Lê Văn Staff', 3, '0111222333', 1, NULL, NULL);
+VALUES ('staff', '123456', 'staff@alotra.com', N'Lê Văn Staff', 2, '0111222333', 1, NULL, NULL);
 
 -- Thêm nhân viên không hoạt động (để test)
 INSERT INTO NhanVien (Username, MatKhauHash, Email, TenNV, VaiTro, SoDienThoai, TrangThai, AnhDaiDien, DeletedAt)
@@ -23,3 +26,4 @@ Thông tin đăng nhập test:
 3. Staff: username/email: staff / staff@alotra.com, password: 123456
 4. Inactive (không thể đăng nhập): username: inactive, password: 123456
 */
+

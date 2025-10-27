@@ -40,4 +40,14 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
      */
     @Query("SELECT COUNT(nv) > 0 FROM NhanVien nv WHERE LOWER(nv.email) = LOWER(:email) AND nv.deletedAt IS NULL")
     boolean existsByEmailIgnoreCase(@Param("email") String email);
+    
+    /*Dùng cho CustomerEmployeeDetailsService.java*/
+    Optional<NhanVien> findByUsernameOrEmail(String username, String email);
+    
+    //*Checkpoint3
+    // Đếm tổng số nhân viên đang active và chưa bị xóa mềm
+    long countByTrangThaiAndDeletedAtIsNull(Byte trangThai);
+    
+    
+    
 }

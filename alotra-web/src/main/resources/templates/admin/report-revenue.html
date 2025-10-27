@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Báo cáo Doanh thu</title>
+    <style>
+        /* CSS nội tuyến của bạn */
+        .kpi-card .card-body { padding: 1rem; }
+        .kpi-card .display-4 { font-size: 1.8rem; font-weight: bold; }
+        .kpi-card .text-muted { font-size: 0.8rem; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .filter-form .form-label { margin-bottom: 0.2rem; font-size: 0.9rem; }
+        .quick-filter-btn.active { background-color: #667eea; border-color: #667eea; color: white; }
+    </style>
+</head>
+<body>
+
+    <th:block layout:fragment="page_title">Báo cáo Doanh thu</th:block>
+
+    <div layout:fragment="content">
+        
+        <div class="card shadow mb-4">
+            <div class="card-body filter-form">
+                <form th:action="@{/admin/reports/revenue}" method="get"
+                      class="row g-3 align-items-end">
+                    <div class="col-12 col-md-auto mb-2 mb-md-0">
+                        <label class="form-label">Lọc nhanh:</label>
+                        <div class="btn-group" role="group">
+                            <a th:href="@{/admin/reports/revenue(range='today')}" class="btn btn-sm btn-outline-primary quick-filter-btn" th:classappend="${selectedRange == 'today'} ? 'active'">Hôm nay</a>
+                            <a th:href="@{/admin/reports/revenue(range='week')}" class="btn btn-sm btn-outline-primary quick-filter-btn" th:classappend="${selectedRange == 'week'} ? 'active'">7 ngày qua</a>
+                            <a th:href="@{/admin/reports/revenue(range='month')}" class="btn btn-sm btn-outline-primary quick-filter-btn" th:classappend="${selectedRange == 'month'} ? 'active'">Tháng này</a>
+                            <a th:href="@{/admin/reports/revenue(range='year')}" class="btn btn-sm btn-outline-primary quick-filter-btn" th:classappend="${selectedRange == 'year'} ? 'active'">Năm nay</a>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-auto">
+                        <label for="startDate" class="form-label">Từ ngày:</label>
+                        <input type="date" class="form-control form-control-sm" id="startDate" name="startDate" th:value="${#temporals.format(selectedStartDate, 'yyyy-MM-dd')}">
+                    </div>
+                    <div class="col-6 col-md-auto">
+                        <label for="endDate" class="form-label">Đến ngày:</label>
+                        <input type="date" class="form-control form-control-sm" id="endDate" name="endDate" th:value="${#temporals.format(selectedEndDate, 'yyyy-MM-dd')}">
+                    </div>
+                    <div class="col-12 col-md-auto">
+                        <label for="categoryId" class="form-label">Top sản phẩm bán chạy theo Danh mục:</label>
+                        <select class="form-select form-select-sm" id="categoryId" name="categoryId">
+                            <option value="">-- Tất cả --</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.maDM}"
+                                    th:text="${cat.tenDM}"
+                                    th:selected="${selectedCategoryId != null and selectedCategoryId == cat.maDM}"></option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-auto">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="fas fa-filter me-1"></i> Lọc
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card shadow kpi-card border-left-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted text-uppercase small">Tổng Doanh thu</div>
+                                <div class="display-4 text-success" th:text="${#numbers.formatDecimal(kpiData.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</div>
+                            </div>
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                 <div class="card shadow kpi-card border-left-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted text-uppercase small">Tổng Đơn hàng đã hoàn thành</div>
+                                <div class="display-4 text-primary" th:text="${kpiData.totalOrders}">0</div>
+                            </div>
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                 <div class="card shadow kpi-card border-left-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted text-uppercase small">Giá trị Đơn TB</div>
+                                <div class="display-4 text-info" th:text="${#numbers.formatDecimal(kpiData.averageOrderValue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</div>
+                            </div>
+                            <i class="fas fa-receipt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-lg-7">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Doanh thu theo thời gian</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="revenueOverTimeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Doanh thu theo Danh mục</h6>
+                    </div>
+                    <div class="card-body">
+                         <div class="chart-container" style="height: 300px;">
+                             <canvas id="revenueByCategoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Top 10 Sản phẩm Bán chạy</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" width="100%">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Tên Sản phẩm</th>
+                                <th class="text-center">Số lượng bán</th>
+                                <th class="text-end">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product, iterStat : ${topProducts}">
+                                <td th:text="${iterStat.count}"></td>
+                                <td th:text="${product.tenSP}"></td>
+                                <td class="text-center" th:text="${product.soLuongBan}"></td>
+                                <td class="text-end"
+                                    th:text="${#numbers.formatDecimal(product.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(topProducts)}">
+                                <td colspan="4" class="text-center text-muted py-3">Không có dữ liệu sản phẩm.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    
+    <th:block layout:fragment="scripts">
+        
+        <script th:src="@{/js/admin-report-revenue.js}"></script>
+        
+        <script th:inline="javascript">
+            
+            // Khối Doanh thu theo thời gian
+            /*[# th:if="${revenueOverTime != null && !#lists.isEmpty(revenueOverTime)}"]*/
+            const REVENUE_LABELS = /*[[ ${#lists.toList(revenueOverTime.![#temporals.format(reportDate, 'dd/MM')])} ]]*/ [];
+            const REVENUE_VALUES = /*[[ ${#lists.toList(revenueOverTime.![totalRevenue])} ]]*/ [];
+            window.drawRevenueChart(REVENUE_LABELS, REVENUE_VALUES);
+            /*[/]*/
+
+            // Khối Doanh thu theo Danh mục
+            /*[# th:if="${revenueByCategory != null && !#lists.isEmpty(revenueByCategory)}"]*/
+            const CATEGORY_LABELS = /*[[ ${#lists.toList(revenueByCategory.![tenDM])} ]]*/ [];
+            const CATEGORY_VALUES = /*[[ ${#lists.toList(revenueByCategory.![totalRevenue])} ]]*/ [];
+            window.drawCategoryChart(CATEGORY_LABELS, CATEGORY_VALUES);
+            /*[/]*/
+            
+        </script>
+        
+    </th:block>
+
+</body>
+</html>

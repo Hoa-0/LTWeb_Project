@@ -4,7 +4,7 @@ import com.alotra.web.entity.DanhMucSanPham;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
+import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +26,10 @@ public interface DanhMucSanPhamRepository extends JpaRepository<DanhMucSanPham, 
     // Đếm số danh mục active
     @Query("SELECT COUNT(dm) FROM DanhMucSanPham dm WHERE dm.deletedAt IS NULL")
     long countAllActive();
+    
+ // Lấy danh mục còn hoạt động để đổ vào dropdown
+ // Lấy danh mục còn hoạt động để đổ vào dropdown (Sử dụng cú pháp Spring Data JPA - đã sửa lỗi cú pháp)
+    // Phương thức này có chức năng TƯƠNG ĐƯƠNG findAllActive ở trên
+    List<DanhMucSanPham> findByDeletedAtIsNullOrderByTenDMAsc();
+ // Sắp xếp theo tên
 }

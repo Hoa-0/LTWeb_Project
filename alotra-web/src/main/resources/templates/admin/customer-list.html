@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Quản lý Khách hàng</title>
+    <style>
+         /* ===== CSS SWITCH ĐÃ BỔ SUNG ĐẦY ĐỦ ===== */
+         .switch { 
+             position: relative; display: inline-block; width: 50px; height: 24px; 
+         }
+         .switch input { opacity: 0; width: 0; height: 0; }
+         .slider { 
+             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; 
+             background-color: #ccc; transition: .4s; border-radius: 24px; 
+         }
+         .slider:before { 
+             position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; 
+             background-color: white; transition: .4s; border-radius: 50%; 
+         }
+         /* Màu khi BẬT */
+         input:checked + .slider { background-color: #28a745; } /* Màu xanh lá cây (Active/Success) */
+         input:checked + .slider:before { transform: translateX(26px); }
+         /* Kết thúc CSS switch */
+         
+         .action-form { display: inline-block; margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+
+    <th:block layout:fragment="page_title">
+        Quản lý Khách hàng
+    </th:block>
+
+    <div layout:fragment="content">
+
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}">Thông báo thành công</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}">Thông báo lỗi</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Danh sách Khách hàng</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="customerTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Mã KH</th>
+                                <th>Tên KH</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cust : ${customers}">
+                                <td th:text="${cust.maKH}"></td>
+                                <td th:text="${cust.tenKH}"></td>
+                                <td th:text="${cust.email}"></td>
+                                <td th:text="${cust.soDienThoai} ?: 'Chưa cập nhật'"></td>
+                                <td class="text-center align-middle">
+                                    <form th:action="@{/admin/customers/{id}/toggle-status(id=${cust.maKH})}" method="post" class="action-form">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <label class="switch m-0">
+                                            <input type="checkbox" th:checked="${cust.trangThai == 1}" onchange="this.form.submit()">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div layout:fragment="content">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Danh sách Khách hàng</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="customerTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Mã KH</th>
+                                <th>Tên KH</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th> </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="cust : ${customers}">
+                                <td th:text="${cust.maKH}"></td>
+                                <td th:text="${cust.tenKH}"></td>
+                                <td th:text="${cust.email}"></td>
+                                <td th:text="${cust.soDienThoai} ?: 'Chưa cập nhật'"></td>
+                                
+                                <td class="text-center align-middle">
+                                    <form th:action="@{/admin/customers/{id}/toggle-status(id=${cust.maKH})}" method="post" class="action-form">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <label class="switch m-0">
+                                            <input type="checkbox" th:checked="${cust.trangThai == 1}" onchange="this.form.submit()">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </form>
+                                </td>
+                                
+                                <td class="text-center align-middle">
+                                    <form th:action="@{/admin/customers/{id}/delete-permanently(id=${cust.maKH})}" method="post" class="action-form">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Xóa vĩnh viễn"
+                                                onclick="return confirm('!!! CẢNH BÁO !!!\nBạn có chắc chắn muốn XÓA VĨNH VIỄN khách hàng này?\nHành động này không thể hoàn tác.')">
+                                            <i class="fas fa-trash-alt"></i> </button>
+                                    </form>
+                                </td>
+                                </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            $(document).ready(function() {
+                // Khởi tạo DataTables trên bảng HTML
+                $('#customerTable').DataTable({
+                     "language": {
+                         "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json"
+                     },
+                      "columnDefs": [
+                         { "orderable": false, "targets": [4] } // Không cho sort cột Trạng thái
+                      ]
+                });
+
+                // Tự động tắt thông báo sau 5 giây (nếu có)
+                setTimeout(function() {
+                    $('.alert').alert('close');
+                }, 5000);
+            });
+            /*]]>*/
+        </script>
+    </th:block>
+
+</body>
+</html>

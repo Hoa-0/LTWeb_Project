@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="${pageTitle ?: 'Quản lý Nhân viên'}"></title>
+</head>
+<body>
+
+    <th:block layout:fragment="page_title">
+        <span th:text="${pageTitle ?: 'Quản lý Nhân viên'}"></span>
+    </th:block>
+
+    <div layout:fragment="content">
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary" th:text="${pageTitle ?: 'Thông tin Nhân viên'}"></h6>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/employees/update}" th:object="${nhanVien}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <input type="hidden" th:field="*{maNV}"/>
+                    <input type="hidden" th:field="*{username}"/>
+                     <input type="hidden" th:field="*{matKhauHash}"/>
+                     <input type="hidden" th:field="*{vaiTro}"/>
+                     <input type="hidden" th:field="*{trangThai}"/>
+                     <input type="hidden" th:field="*{deletedAt}"/>
+                     <input type="hidden" th:field="*{anhDaiDien}"/> <div class="mb-3 row">
+                        <label for="tenNV" class="col-sm-3 col-form-label">Tên Nhân viên <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="tenNV" th:field="*{tenNV}" required
+                                   th:classappend="${#fields.hasErrors('tenNV')} ? 'is-invalid'">
+                            <div th:if="${#fields.hasErrors('tenNV')}" class="invalid-feedback" th:errors="*{tenNV}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="email" class="col-sm-3 col-form-label">Email <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input type="email" class="form-control" id="email" th:field="*{email}" required
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                            <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback" th:errors="*{email}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="soDienThoai" class="col-sm-3 col-form-label">Số Điện Thoại</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="soDienThoai" th:field="*{soDienThoai}"
+                                   th:classappend="${#fields.hasErrors('soDienThoai')} ? 'is-invalid'">
+                             <div th:if="${#fields.hasErrors('soDienThoai')}" class="invalid-feedback" th:errors="*{soDienThoai}"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-sm-3 col-form-label">Username</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control-plaintext" th:value="*{username}" readonly>
+                        </div>
+                    </div>
+                     <div class="mb-3 row">
+                         <label class="col-sm-3 col-form-label">Vai trò</label>
+                         <div class="col-sm-9">
+                             <input type="text" class="form-control-plaintext" th:value="*{getVaiTroText()}" readonly>
+                         </div>
+                     </div>
+                     <div class="mb-3 row">
+                         <label class="col-sm-3 col-form-label">Trạng thái</label>
+                         <div class="col-sm-9">
+                             <span th:text="*{trangThai == 1 ? 'Hoạt động' : 'Vô hiệu hóa'}"
+                                   th:classappend="*{trangThai == 1} ? 'text-success' : 'text-danger'"
+                                   class="align-middle"></span>
+                              <span th:if="*{deletedAt != null}" class="badge bg-dark ms-2">Đã xóa</span>
+                         </div>
+                     </div>
+
+
+                    <div class="row mt-4">
+                        <div class="col-sm-9 offset-sm-3">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-save me-1"></i> Lưu thay đổi
+                            </button>
+                            <a th:href="@{/admin/employees}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách
+                            </a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <th:block layout:fragment="scripts">
+        </th:block>
+
+</body>
+</html>

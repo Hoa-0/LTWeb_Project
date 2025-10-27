@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title th:text="${formTitle}">Form Khuyến mãi</title>
+</head>
+<body>
+
+    <th:block layout:fragment="page_title" th:text="${formTitle}">
+        Form Khuyến mãi
+    </th:block>
+
+    <div layout:fragment="content">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary" th:text="${formTitle}"></h6>
+            </div>
+            <div class="card-body">
+
+                <form th:object="${promotionDTO}"
+                      th:action="${promotionDTO.maKM == null} ? @{/admin/promotions/add} : @{/admin/promotions/{id}/edit(id=${promotionDTO.maKM})}"
+                      method="post">
+                    
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    
+                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert">
+                        <ul class="mb-0">
+                            <li th:each="err : ${#fields.globalErrors()}" th:text="${err}"></li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tenSuKien" class="form-label">Tên Sự kiện <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="tenSuKien"
+                               th:field="*{tenSuKien}"
+                               th:classappend="${#fields.hasErrors('tenSuKien')} ? 'is-invalid' : ''">
+                        <div th:if="${#fields.hasErrors('tenSuKien')}" class="invalid-feedback"
+                             th:errors="*{tenSuKien}"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="moTa" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="moTa" rows="3"
+                                  th:field="*{moTa}"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="ngayBD" class="form-label">Ngày Bắt đầu <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="ngayBD"
+                                   th:field="*{ngayBD}"
+                                   th:classappend="${#fields.hasErrors('ngayBD')} ? 'is-invalid' : ''">
+                            <div th:if="${#fields.hasErrors('ngayBD')}" class="invalid-feedback"
+                                 th:errors="*{ngayBD}"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="ngayKT" class="form-label">Ngày Kết thúc <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="ngayKT"
+                                   th:field="*{ngayKT}"
+                                   th:classappend="${#fields.hasErrors('ngayKT')} ? 'is-invalid' : ''">
+                            <div th:if="${#fields.hasErrors('ngayKT')}" class="invalid-feedback"
+                                 th:errors="*{ngayKT}"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                             <label for="trangThai" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                             <select class="form-select" id="trangThai" 
+                                     th:field="*{trangThai}"
+                                     th:classappend="${#fields.hasErrors('trangThai')} ? 'is-invalid' : ''">
+                                 <option value="">-- Chọn trạng thái --</option>
+                                 <option value="1">Hoạt động</option>
+                                 <option value="0">Vô hiệu hóa</option>
+                             </select>
+                             <div th:if="${#fields.hasErrors('trangThai')}" class="invalid-feedback"
+                                  th:errors="*{trangThai}"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="urlAnh" class="form-label">URL Ảnh (tạm thời)</label>
+                            <input type="text" class="form-control" id="urlAnh"
+                                   th:field="*{urlAnh}"
+                                   placeholder="https://example.com/image.png">
+                            </div>
+                    </div>
+
+                    <hr>
+                    <div class="text-end">
+                        <a th:href="@{/admin/promotions}" class="btn btn-secondary me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Lưu lại
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
