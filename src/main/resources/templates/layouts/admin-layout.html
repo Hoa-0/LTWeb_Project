@@ -16,8 +16,35 @@
 
 <!-- Custom CSS -->
 <link rel="stylesheet" th:href="@{/css/admin-style.css}">
+<style>
+    .admin-theme #sidebar-wrapper {
+        background: linear-gradient(180deg, #00b4d8 0%, #0096c7 100%);
+    }
+    .admin-theme .sidebar-heading a {
+        color: white !important;
+    }
+    .admin-theme .list-group-item {
+        color: rgba(255,255,255,0.9);
+        background: transparent;
+        border: none;
+    }
+    .admin-theme .list-group-item:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+    .admin-theme .list-group-item.active-custom {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        font-weight: 600;
+    }
+    .admin-theme .list-group-item.active-submenu {
+        background: rgba(255,255,255,0.15);
+        color: white;
+        font-weight: 500;
+    }
+</style>
 </head>
-<body>
+<body class="admin-theme">
 	<div class="d-flex" id="wrapper">
 
 		<!-- Sidebar -->

@@ -45,9 +45,22 @@ public class AccountController {
     // Profile - view form
     @GetMapping("/profile")
     public String showProfilePage(@AuthenticationPrincipal KhachHangUserDetails current,
-                                  Model model) {
+                                  Model model,
+                                  RedirectAttributes ra) {
+        // Check if user is authenticated and has valid ID
+        if (current == null || current.getId() == null) {
+            ra.addFlashAttribute("error", "Bạn cần đăng nhập để xem trang này.");
+            return "redirect:/login";
+        }
+        
         model.addAttribute("pageTitle", "Thông Tin Tài Khoản");
         KhachHang kh = khachHangService.findById(current.getId());
+        
+        if (kh == null) {
+            ra.addFlashAttribute("error", "Không tìm thấy thông tin tài khoản.");
+            return "redirect:/";
+        }
+        
         ProfileForm form = new ProfileForm();
         form.fullName = kh.getFullName();
         form.email = kh.getEmail();
@@ -64,7 +77,19 @@ public class AccountController {
                                 BindingResult result,
                                 RedirectAttributes ra,
                                 Model model) {
+        // Check if user is authenticated and has valid ID
+        if (current == null || current.getId() == null) {
+            ra.addFlashAttribute("error", "Bạn cần đăng nhập để thực hiện thao tác này.");
+            return "redirect:/login";
+        }
+        
         KhachHang kh = khachHangService.findById(current.getId());
+        
+        if (kh == null) {
+            ra.addFlashAttribute("error", "Không tìm thấy thông tin tài khoản.");
+            return "redirect:/";
+        }
+        
         // Validate email unique (exclude self)
         if (form.email != null && !form.email.equalsIgnoreCase(kh.getEmail())) {
             KhachHang byEmail = khachHangService.findByEmail(form.email);
@@ -112,7 +137,14 @@ public class AccountController {
                                  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
                                  @RequestParam(value = "to", required = false)
                                  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to,
+                                 RedirectAttributes ra,
                                  Model model) {
+        // Check if user is authenticated and has valid ID
+        if (current == null || current.getId() == null) {
+            ra.addFlashAttribute("error", "Bạn cần đăng nhập để xem trang này.");
+            return "redirect:/login";
+        }
+        
         model.addAttribute("pageTitle", "Lịch Sử Đơn Hàng");
         Integer orderId = null;
         if (code != null && !code.isBlank()) {
@@ -141,6 +173,12 @@ public class AccountController {
                               @AuthenticationPrincipal KhachHangUserDetails current,
                               RedirectAttributes ra,
                               Model model) {
+        // Check if user is authenticated and has valid ID
+        if (current == null || current.getId() == null) {
+            ra.addFlashAttribute("error", "Bạn cần đăng nhập để xem trang này.");
+            return "redirect:/login";
+        }
+        
         var order = orderService.getOrderOfCustomer(id, current.getId());
         if (order == null) {
             ra.addFlashAttribute("error", "Không tìm thấy đơn hàng.");

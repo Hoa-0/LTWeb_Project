@@ -22,8 +22,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
         Long getSoldQty();
     }
 
-    // Top 5 best sellers by total quantity sold (paid orders only). Includes products with zero sales.
-    @Query(value = "SELECT TOP 5 sp.MaSP AS id, sp.TenSP AS name, sp.UrlAnh AS imageUrl, " +
+    // Top 20 best sellers by total quantity sold (paid orders only). Includes products with zero sales.
+    @Query(value = "SELECT TOP 20 sp.MaSP AS id, sp.TenSP AS name, sp.UrlAnh AS imageUrl, " +
             " MIN(b.GiaBan) AS price, COALESCE(SUM(CASE WHEN dh.PaymentStatus='DaThanhToan' THEN ct.SoLuong ELSE 0 END),0) AS soldQty " +
             "FROM SanPham sp " +
             "LEFT JOIN BienTheSanPham b ON b.MaSP = sp.MaSP " +
