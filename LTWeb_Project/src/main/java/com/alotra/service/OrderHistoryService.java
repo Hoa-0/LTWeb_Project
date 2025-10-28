@@ -119,7 +119,14 @@ public class OrderHistoryService {
 
     // Fetch order header by orderId regardless of customer (for vendor view)
     public OrderRow getOrder(Integer orderId) {
-        DonHang dh = em.find(DonHang.class, orderId);
+        //DonHang dh = em.find(DonHang.class, orderId);
+    	// THAY THẾ BẰNG JPQL ĐỂ FETCH EMPLOYEE (kể cả khi employee là null)
+        TypedQuery<DonHang> q = em.createQuery(
+                "SELECT dh FROM DonHang dh LEFT JOIN FETCH dh.employee WHERE dh.id = :id", DonHang.class);
+        q.setParameter("id", orderId);
+        List<DonHang> list = q.getResultList();
+        DonHang dh = list.isEmpty() ? null : list.get(0);
+        // KẾT THÚC THAY THẾ
         return dh == null ? null : mapOrderRow(dh);
     }
 
@@ -137,6 +144,7 @@ public class OrderHistoryService {
         try { r.receiverName = dh.getReceiverName(); } catch (Exception ignore) {}
         try { r.receiverPhone = dh.getReceiverPhone(); } catch (Exception ignore) {}
         try { r.shippingAddress = dh.getShippingAddress(); } catch (Exception ignore) {}
+        try { r.employee = dh.getEmployee(); } catch (Exception ignore) {} // <--- THÊM DÒNG NÀY
         return r;
     }
 
@@ -152,6 +160,7 @@ public class OrderHistoryService {
         public String receiverName;
         public String receiverPhone;
         public String shippingAddress;
+        public NhanVien employee;
     }
 
     public static class OrderItemRow {
