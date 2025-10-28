@@ -26,44 +26,36 @@ public class ShipperOrderService {
     }
 
     /**
-     * Lấy thống kê cho dashboard của shipper (hiển thị tất cả đơn, không phân biệt shipper)
+     * Lấy thống kê cho dashboard của shipper (ĐÃ SỬA LỖI)
      */
     public Map<String, Object> getDashboardStats(Integer shipperId) {
         Map<String, Object> stats = new HashMap<>();
-        
+
+        // Xác định các mốc thời gian
         LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+        // Tính mốc 7 ngày trước (ví dụ: nếu hôm nay là thứ 3, lấy từ thứ 3 tuần trước)
+        LocalDateTime startOfWeek = LocalDateTime.of(LocalDate.now().minusDays(6), LocalTime.MIN); // 7 ngày bao gồm hôm nay
+
+        // === BẮT ĐẦU SỬA LỖI: Gọi đúng các hàm Repository ===
+
+        // 1. Đang giao (Chỉ của shipper này)
+        long shipping = donHangRepository.countByEmployeeIdAndStatus(shipperId, "DangGiao");
+
+        // 2. Đã giao hôm nay (Chỉ của shipper này)
+        long deliveredToday = donHangRepository.countByEmployeeIdAndStatusAndCreatedAtBetween(
+                shipperId, "DaGiao", startOfDay, endOfDay);
+
+        // 3. Tổng được phân công (Các đơn shipper này đang xử lý, bao gồm cả đơn vừa nhận)
+        List<String> assignedStatuses = List.of("ChoXuLy", "DangPhaChe", "DangGiao");
+        long totalAssigned = donHangRepository.countByEmployeeIdAndStatusIn(shipperId, assignedStatuses);
+
+        // 4. Giao tuần này (Tính 7 ngày gần nhất, chỉ của shipper này)
+        long deliveredThisWeek = donHangRepository.countByEmployeeIdAndStatusAndCreatedAtAfter(
+                shipperId, "DaGiao", startOfWeek);
         
-        // Lấy tất cả đơn hàng
-        List<DonHang> allOrders = donHangRepository.findAll();
-        
-        // Đơn đang giao (TẤT CẢ)
-        long shipping = allOrders.stream()
-            .filter(o -> "DangGiao".equals(o.getStatus()))
-            .count();
-        
-        // Đơn đã giao hôm nay (TẤT CẢ)
-        long deliveredToday = allOrders.stream()
-            .filter(o -> "DaGiao".equals(o.getStatus()))
-            .filter(o -> o.getCreatedAt() != null && 
-                        o.getCreatedAt().isAfter(startOfDay) && 
-                        o.getCreatedAt().isBefore(endOfDay))
-            .count();
-        
-        // Tổng đơn đang xử lý
-        long totalAssigned = allOrders.stream()
-            .filter(o -> "ChoXuLy".equals(o.getStatus()) || 
-                        "DangPhaChe".equals(o.getStatus()) || 
-                        "DangGiao".equals(o.getStatus()))
-            .count();
-        
-        // Đơn đã giao trong tuần
-        LocalDateTime startOfWeek = LocalDateTime.of(LocalDate.now().minusDays(7), LocalTime.MIN);
-        long deliveredThisWeek = allOrders.stream()
-            .filter(o -> "DaGiao".equals(o.getStatus()))
-            .filter(o -> o.getCreatedAt() != null && o.getCreatedAt().isAfter(startOfWeek))
-            .count();
-        
+        // === KẾT THÚC SỬA LỖI ===
+
         stats.put("shipping", shipping);
         stats.put("deliveredToday", deliveredToday);
         stats.put("totalAssigned", totalAssigned);
@@ -76,20 +68,31 @@ public class ShipperOrderService {
      * Lấy danh sách đơn hàng (TẤT CẢ, không phân biệt shipper)
      */
     public List<OrderDto> getAssignedOrders(Integer shipperId, String status, String keyword, Integer limit) {
-        List<DonHang> orders = donHangRepository.findAll();
-        
-        // Filter by status
+    	List<String> targetStatuses;
+        // Xác định các trạng thái cần lấy
         if (status != null && !status.isBlank()) {
-            String finalStatus = status;
-            orders = orders.stream()
-                .filter(o -> finalStatus.equals(o.getStatus()))
-                .collect(Collectors.toList());
+            // Nếu có lọc status cụ thể
+            if ("DaHuy".equals(status)) { // Tránh lấy đơn đã hủy trừ khi được yêu cầu rõ
+                 return List.of(); // Hoặc trả về đơn hủy nếu cần
+            }
+            targetStatuses = List.of(status);
         } else {
-            // Lấy tất cả đơn trừ DaHuy
-            orders = orders.stream()
-                .filter(o -> !"DaHuy".equals(o.getStatus()))
-                .collect(Collectors.toList());
+            // Mặc định lấy các trạng thái liên quan đến shipper (trừ hủy)
+            targetStatuses = List.of("ChoXuLy", "DangPhaChe", "DangGiao", "DaGiao");
         }
+        
+     // === Sử dụng query trong Repository (Cách tốt nhất) ===
+        // List<DonHang> orders = donHangRepository.findByEmployeeIdAndStatusIn(shipperId, targetStatuses);
+        // Tạm thời filter trong code:
+        List<DonHang> orders = donHangRepository.findAll().stream()
+                .filter(o -> o.getEmployee() != null && shipperId.equals(o.getEmployee().getId())) // LỌC THEO SHIPPER ID
+                .filter(o -> targetStatuses.contains(o.getStatus())) // Lọc theo trạng thái mong muốn
+             // === BẮT ĐẦU SỬA: Lọc bỏ đơn đã hoàn thành ===
+                .filter(o -> !(
+                    "DaGiao".equals(o.getStatus()) && "DaThanhToan".equals(o.getPaymentStatus())
+                ))
+                // === KẾT THÚC SỬA ===
+                .collect(Collectors.toList());
         
         // Filter by keyword
         if (keyword != null && !keyword.isBlank()) {
@@ -120,10 +123,9 @@ public class ShipperOrderService {
      * Lấy danh sách đơn hàng chờ xử lý (chưa có shipper)
      */
     public List<OrderDto> getAvailableOrders(String keyword, Integer limit) {
-        List<DonHang> orders = donHangRepository.findAll().stream()
-            .filter(o -> "ChoXuLy".equals(o.getStatus()) || 
-                        (o.getEmployee() == null && !"DaHuy".equals(o.getStatus())))
-            .collect(Collectors.toList());
+    	List<DonHang> orders = donHangRepository.findAll().stream()
+                .filter(o -> "ChoXuLy".equals(o.getStatus()) && o.getEmployee() == null) // LOGIC ĐÚNG
+                .collect(Collectors.toList());
         
         // Filter by keyword
         if (keyword != null && !keyword.isBlank()) {
@@ -235,25 +237,37 @@ public class ShipperOrderService {
         if (order == null) return false;
         
         // Kiểm tra quyền: phải là shipper của đơn này
-        if (order.getEmployee() == null || !order.getEmployee().getId().equals(shipperId)) {
+        if (order.getEmployee() == null || !shipperId.equals(order.getEmployee().getId())) {
+            System.out.println("=== SERVICE ADVANCE: Order not assigned to this shipper");
             return false;
         }
         
         // Block nếu chưa thanh toán mà là chuyển khoản
         if ("ChuyenKhoan".equalsIgnoreCase(order.getPaymentMethod())
                 && !"DaThanhToan".equals(order.getPaymentStatus())) {
+            System.out.println("=== SERVICE ADVANCE: Blocked - ChuyenKhoan not paid");
             return false;
         }
         
         String currentStatus = order.getStatus();
-        String nextStatus = getNextStatus(currentStatus);
         
+        // === BỎ ĐOẠN CODE BLOCK NÀY ===
+        // if ("ChoXuLy".equals(currentStatus)) {
+        //     System.out.println("=== SERVICE ADVANCE: Cannot advance from ChoXuLy");
+        //     return false;
+        // }
+        // === KẾT THÚC BỎ ===
+        
+        String nextStatus = getNextStatus(currentStatus);
+        System.out.println("=== SERVICE ADVANCE: current=" + currentStatus + ", next=" + nextStatus);
+
         if (nextStatus != null && !nextStatus.equals(currentStatus)) {
             order.setStatus(nextStatus);
             donHangRepository.save(order);
+            System.out.println("=== SERVICE ADVANCE: Status updated");
             return true;
         }
-        
+        System.out.println("=== SERVICE ADVANCE: No status change");
         return false;
     }
 
